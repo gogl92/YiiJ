@@ -1,10 +1,10 @@
 package com.yiij.base;
 
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.apache.commons.beanutils.ConstructorUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 
 import com.yiij.base.interfaces.IComponent;
@@ -38,8 +38,10 @@ public class Component implements IComponent
 			argumentsTypes[ctarg] = arguments[ctarg].getClass();
 		}
 		
-		Constructor<Component> c = cclass.getConstructor(argumentsTypes);
-		Component object = c.newInstance(arguments);
+		//Constructor<Component> c = cclass.getConstructor(argumentsTypes);
+		//Component object = c.newInstance(arguments);
+		
+		Component object = (Component)ConstructorUtils.invokeConstructor(cclass, arguments);
 		
 		object.setConfig(cconfig);
 		object.init();

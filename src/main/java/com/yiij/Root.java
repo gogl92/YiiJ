@@ -6,13 +6,34 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.yiij.base.Application;
+import com.yiij.base.Component;
+import com.yiij.base.ComponentConfig;
 import com.yiij.web.WebApplication;
 
 public class Root
 {
-	public static WebApplication createWebApplication(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
+	public static WebApplication createWebApplication(ComponentConfig config, HttpServletRequest request, HttpServletResponse response) 
+			throws ServletException, IOException
 	{
-		return new WebApplication(request, response);
+		if (config.contains("appplication") && (
+			((ComponentConfig)config.get("appplication")).className == null || ((ComponentConfig)config.get("appplication")).className.equals("") ) )
+			((ComponentConfig)config.get("appplication")).className = WebApplication.class.getCanonicalName();
+		try
+		{
+			return (WebApplication)Component.newInstance(config.contains("application")?config.get("application"):WebApplication.class.getCanonicalName(), request, response);
+		} catch (Exception e)
+		{
+			throw new ServletException(e);
+		}
+		
+		/*
+		Class<WebApplication> appClass = WebApplication.class;
+		try
+		{
+			return appClass.getConstructor(HttpServletRequest.class, HttpServletResponse.class).newInstance(request, response);
+		} catch (java.lang.Exception e) {
+			throw new ServletException(e);
+		}
+		*/
 	}
 }

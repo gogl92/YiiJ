@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.yiij.base.interfaces.IApplicationComponent;
 
-public class Module
+public class Module extends Component
 {
 	private String _id;
 	private Module _parentModule;

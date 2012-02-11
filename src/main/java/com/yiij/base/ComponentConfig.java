@@ -46,7 +46,9 @@ public class ComponentConfig extends Hashtable<String, Object>
 			if (n instanceof Element)
 			{
 				if (((Element) n).getTagName().equals("application"))
+				{
 					put("application", parseModule((Element)n));
+				}	
 			}
 		}
 	}
