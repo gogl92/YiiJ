@@ -47,7 +47,7 @@ public class Controller extends BaseController
 	
 	public Action createAction(String actionID) throws Exception
 	{
-		String actionMethodName = actionID.substring(0,1).toUpperCase() + actionID.substring(1);
+		String actionMethodName = "action"+actionID.substring(0,1).toUpperCase() + actionID.substring(1);
 		try
 		{
 			getClass().getMethod(actionMethodName, new Class[] {});

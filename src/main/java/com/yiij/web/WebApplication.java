@@ -33,7 +33,7 @@ public class WebApplication extends Application implements IWebApplication
 	{
 		Object[] ca = createController(route);
 		
-		if (ca.length != 2)
+		if (ca.length == 2)
 		{
 			Controller controller = (Controller)ca[0];
 			String actionID = (String)ca[1];
