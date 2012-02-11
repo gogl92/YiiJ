@@ -6,4 +6,10 @@ import java.util.Hashtable;
 public class ComponentConfig extends Hashtable<String, Object>
 {
 	public String className;
+	
+	public ComponentConfig(String className)
+	{
+		super();
+		this.className = className;
+	}
 }

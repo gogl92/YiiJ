@@ -49,6 +49,9 @@ public class Component implements IComponent
 	
 	public void setConfig(ComponentConfig config) throws java.lang.Exception
 	{
+		if (config == null)
+			return;
+		
 		PropertyDescriptor pdesc;
 		
 		ArrayList<String> innerConfig = new ArrayList<String>();
@@ -56,11 +59,13 @@ public class Component implements IComponent
 		Iterator<String> i = config.keySet().iterator();
 		while (i.hasNext())
 		{
-			pdesc = PropertyUtils.getPropertyDescriptor(this, i.next());
+			String key = i.next();
+			
+			pdesc = PropertyUtils.getPropertyDescriptor(this, key);
 			if (pdesc.getClass().isAssignableFrom(Component.class))
-				innerConfig.add(i.next());
+				innerConfig.add(key);
 			else
-				PropertyUtils.setProperty(this, i.next(), config.get(i.next()));
+				PropertyUtils.setProperty(this, key, config.get(key));
 		}
 		
 		for (String ic : innerConfig)
