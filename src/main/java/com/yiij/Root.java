@@ -20,20 +20,10 @@ public class Root
 			((ComponentConfig)config.get("appplication")).className = WebApplication.class.getCanonicalName();
 		try
 		{
-			return (WebApplication)Component.newInstance(config.contains("application")?config.get("application"):WebApplication.class.getCanonicalName(), request, response);
+			return (WebApplication)Component.newInstance(null, config.contains("application")?config.get("application"):WebApplication.class.getCanonicalName(), request, response);
 		} catch (Exception e)
 		{
 			throw new ServletException(e);
 		}
-		
-		/*
-		Class<WebApplication> appClass = WebApplication.class;
-		try
-		{
-			return appClass.getConstructor(HttpServletRequest.class, HttpServletResponse.class).newInstance(request, response);
-		} catch (java.lang.Exception e) {
-			throw new ServletException(e);
-		}
-		*/
 	}
 }

@@ -14,7 +14,7 @@ public class interfaces
 	
 	public interface IComponent
 	{
-		void setConfig(ComponentConfig config) throws java.lang.Exception;
+		void configure(ComponentConfig config) throws java.lang.Exception;
 		void init();
 	}
 	

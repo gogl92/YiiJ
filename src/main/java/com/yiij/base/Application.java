@@ -4,25 +4,16 @@ import java.io.IOException;
 
 import javax.servlet.ServletException;
 
+import com.yiij.base.interfaces.IContext;
+
 public abstract class Application extends Module
 {
-	public Application()
+	public Application(IContext context)
 	{
-		super("", null);
-	}
-
-	/*
-	@Override
-	protected void bootstrap()
-	{
-		preinit();
-
+		super(context, "", null);
 		registerCoreComponents();
-		
-		init();
 	}
-	*/
-	
+
 	/**
 	 * Processes the request.
 	 * This is the place where the actual request processing work is done.
@@ -44,9 +35,7 @@ public abstract class Application extends Module
 		}
 	}
 	
-	/*
 	protected void registerCoreComponents()
 	{
 	}
-	*/
 }

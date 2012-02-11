@@ -4,7 +4,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.yiij.base.Application;
+import com.yiij.base.ComponentConfig;
 import com.yiij.base.HttpException;
+import com.yiij.base.interfaces.IContext;
 import com.yiij.base.interfaces.IWebApplication;
 
 public class WebApplication extends Application implements IWebApplication
@@ -12,14 +14,12 @@ public class WebApplication extends Application implements IWebApplication
 	private HttpServletRequest _servletRequest;
 	private HttpServletResponse _servletResponse;
 
-	public WebApplication(HttpServletRequest servletRequest,
+	public WebApplication(IContext context, HttpServletRequest servletRequest,
 			HttpServletResponse servletResponse)
 	{
-		super();
+		super(context);
 		_servletRequest = servletRequest;
 		_servletResponse = servletResponse;
-
-		registerCoreComponents();
 	}
 
 	@Override
@@ -60,21 +60,29 @@ public class WebApplication extends Application implements IWebApplication
 		return new Object[] { new Controller(), "index" };
 	}
 	
-	public UrlManager getUrlManager()
+	public UrlManager getUrlManager() throws java.lang.Exception
 	{
 		return (UrlManager) getComponent("urlManager");
 	}
 
-	public HttpRequest getRequest()
+	public HttpRequest getRequest() throws java.lang.Exception
 	{
 		return (HttpRequest) getComponent("request");
 	}
 
+	@Override
 	protected void registerCoreComponents()
 	{
-		// super.registerCoreComponents();
-		setComponent("urlManager", new UrlManager());
-		setComponent("request", new HttpRequest(this));
+		super.registerCoreComponents();
+		
+		ComponentConfig config = new ComponentConfig();
+		config.put("urlManager", new ComponentConfig("com.yiij.web.UrlManager"));
+		config.put("request", new ComponentConfig("com.yiij.web.HttpRequest"));
+		
+		setComponents(config);
+		
+		//setComponent("urlManager", new UrlManager());
+		//setComponent("request", new HttpRequest(this));
 	}
 
 	@Override

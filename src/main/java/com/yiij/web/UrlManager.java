@@ -1,9 +1,15 @@
 package com.yiij.web;
 
 import com.yiij.base.ApplicationComponent;
+import com.yiij.base.interfaces.IContext;
 
 public class UrlManager extends ApplicationComponent
 {
+	public UrlManager(IContext context)
+	{
+		super(context);
+	}
+	
 	@Override
 	public void init()
 	{

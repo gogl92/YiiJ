@@ -1,15 +1,12 @@
 package com.yiij.web;
 
 import com.yiij.base.ApplicationComponent;
-import com.yiij.base.interfaces.IWebApplication;
+import com.yiij.base.interfaces.IContext;
 
 public class HttpRequest extends ApplicationComponent
 {
-	private IWebApplication _application;
-	
-	public HttpRequest(IWebApplication application)
+	public HttpRequest(IContext context)
 	{
-		super();
-		_application = application;
+		super(context);
 	}
 }

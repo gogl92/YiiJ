@@ -1,7 +1,7 @@
 package com.yiij.base;
 
 @SuppressWarnings("serial")
-public class Exception extends java.lang.Exception
+public class Exception extends java.lang.RuntimeException
 {
 	public Exception()
 	{

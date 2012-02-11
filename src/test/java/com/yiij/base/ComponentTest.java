@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import com.yiij.base.interfaces.IComponent;
+import com.yiij.base.interfaces.IContext;
 
 public class ComponentTest extends TestCase
 {
@@ -26,17 +27,18 @@ public class ComponentTest extends TestCase
         return new TestSuite( ComponentTest.class );
     }
 
-    public void testComponentInstantiation() throws java.lang.Exception
+    @SuppressWarnings("serial")
+	public void testComponentInstantiation() throws java.lang.Exception
     {
 		IComponent c;
 
-		c = Component.newInstance("com.yiij.base.ComponentTest$TC");
+		c = Component.newInstance(null, "com.yiij.base.ComponentTest$TC");
 		assertNotNull(c);
 		assertTrue(c instanceof TC);
 
 		c = null;
 		
-		c = Component.newInstance(new ComponentConfig("com.yiij.base.ComponentTest$TC") {{
+		c = Component.newInstance(null, new ComponentConfig("com.yiij.base.ComponentTest$TC") {{
 			put("name", "john");
 		}});
 		assertNotNull(c);
@@ -47,6 +49,11 @@ public class ComponentTest extends TestCase
     public static class TC extends Component
     {
     	private String _name;
+    	
+    	public TC(IContext context)
+    	{
+    		super(context);
+    	}
     	
     	public String getName()
     	{

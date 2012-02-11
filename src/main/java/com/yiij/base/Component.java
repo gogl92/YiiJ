@@ -8,11 +8,14 @@ import org.apache.commons.beanutils.ConstructorUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 
 import com.yiij.base.interfaces.IComponent;
+import com.yiij.base.interfaces.IContext;
 
 public class Component implements IComponent
 {
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static IComponent newInstance(Object config, Object... arguments) throws 
+	private IContext _context;
+	
+	@SuppressWarnings({ "unchecked" })
+	public static IComponent newInstance(IContext context, Object config, Object... arguments) throws 
 		java.lang.Exception
 	{
 		String type = null;
@@ -32,24 +35,38 @@ public class Component implements IComponent
 		
 		Class<Component> cclass = (Class<Component>) Class.forName(type);
 		
-		Class[] argumentsTypes = new Class[arguments.length];
+		Object[] realArguments = new Object[arguments.length+1];
+		realArguments[0] = context!=null ? context : new AbstractContext(null);
 		for (int ctarg = 0; ctarg < arguments.length; ctarg++ )
 		{
-			argumentsTypes[ctarg] = arguments[ctarg].getClass();
+			realArguments[ctarg+1] = arguments[ctarg];
 		}
 		
-		//Constructor<Component> c = cclass.getConstructor(argumentsTypes);
-		//Component object = c.newInstance(arguments);
+		Component object = (Component)ConstructorUtils.invokeConstructor(cclass, realArguments);
 		
-		Component object = (Component)ConstructorUtils.invokeConstructor(cclass, arguments);
+		if (context == null && object instanceof Application)
+		{
+			object._context = new AbstractContext((Application)object);
+		}
 		
-		object.setConfig(cconfig);
+		object.configure(cconfig);
 		object.init();
 		
 		return object;
 	}
 	
-	public void setConfig(ComponentConfig config) throws java.lang.Exception
+	public Component(IContext context)
+	{
+		super();
+		_context = context;
+	}
+	
+	public IContext context()
+	{
+		return _context;
+	}
+	
+	public void configure(ComponentConfig config) throws java.lang.Exception
 	{
 		if (config == null)
 			return;
@@ -72,7 +89,7 @@ public class Component implements IComponent
 		
 		for (String ic : innerConfig)
 		{
-			((Component)PropertyUtils.getProperty(this, ic)).setConfig((ComponentConfig)config.get(ic));
+			((Component)PropertyUtils.getProperty(this, ic)).configure((ComponentConfig)config.get(ic));
 		}
 	}
 	

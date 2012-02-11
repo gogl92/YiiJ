@@ -26,6 +26,22 @@ public class ComponentConfig extends Hashtable<String, Object>
 		this.className = className;
 	}
 	
+	public void merge(ComponentConfig other)
+	{
+		for (String i : other.keySet())
+		{
+			if (contains(i))
+			{
+				if (get(i) instanceof ComponentConfig && other.get(i) instanceof ComponentConfig)
+					((ComponentConfig)get(i)).merge((ComponentConfig)other.get(i));
+				else
+					put(i, other.get(i));
+			}
+			else
+				put(i, other.get(i));
+		}
+	}
+	
 	public void parseConfigXml(InputStream is) throws java.lang.Exception
 	{
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

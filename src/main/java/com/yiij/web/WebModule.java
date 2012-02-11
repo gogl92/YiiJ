@@ -1,13 +1,14 @@
 package com.yiij.web;
 
 import com.yiij.base.Module;
+import com.yiij.base.interfaces.IContext;
 
 public class WebModule extends Module
 {
 
-	public WebModule(String id, Module parent)
+	public WebModule(IContext context, String id, Module parent)
 	{
-		super(id, parent);
+		super(context, id, parent);
 	}
 
 }
