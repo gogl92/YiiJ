@@ -9,6 +9,7 @@ import com.yiij.base.interfaces.IContext;
 public class Module extends Component
 {
 	private String _id;
+	private String _packageName;
 	private Module _parentModule;
 	private Map<String, Module> _modules = new Hashtable<String, Module>(); 
 	private Map<String, ComponentConfig> _moduleConfig = new Hashtable<String, ComponentConfig>(); 
@@ -25,6 +26,16 @@ public class Module extends Component
 	public String getId()
 	{
 		return _id;
+	}
+	
+	public String getPackageName()
+	{
+		return _packageName;
+	}
+	
+	public void setPackageName(String value)
+	{
+		_packageName = value;
 	}
 	
 	public Module getParentModule()
@@ -103,7 +114,7 @@ public class Module extends Component
 		}
 	}
 	
-	public Map<String, ComponentConfig> getComponents()
+	public Map<String, ComponentConfig> getComponentsConfig()
 	{
 		return _componentConfig;
 	}

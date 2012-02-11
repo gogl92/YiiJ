@@ -30,7 +30,7 @@ public class ComponentConfig extends Hashtable<String, Object>
 	{
 		for (String i : other.keySet())
 		{
-			if (contains(i))
+			if (containsKey(i))
 			{
 				if (get(i) instanceof ComponentConfig && other.get(i) instanceof ComponentConfig)
 					((ComponentConfig)get(i)).merge((ComponentConfig)other.get(i));

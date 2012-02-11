@@ -81,6 +81,8 @@ public class Component implements IComponent
 			String key = i.next();
 			
 			pdesc = PropertyUtils.getPropertyDescriptor(this, key);
+			if (pdesc == null)
+				throw new NoSuchMethodException("Property '"+key+"' not found in class '"+getClass().getCanonicalName()+"'");
 			if (pdesc.getClass().isAssignableFrom(Component.class))
 				innerConfig.add(key);
 			else
