@@ -57,7 +57,7 @@ public class WebApplication extends Application implements IWebApplication
 	
 	public Object[] createController(String route, WebModule $owner)
 	{
-		return new Object[] { new Controller(), "index" };
+		return new Object[] { new Controller(context(), "home"), "index" };
 	}
 	
 	public UrlManager getUrlManager() throws java.lang.Exception

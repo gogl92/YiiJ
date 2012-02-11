@@ -1,11 +1,54 @@
 package com.yiij.web;
 
 import com.yiij.base.HttpException;
+import com.yiij.base.Module;
+import com.yiij.base.interfaces.IContext;
 import com.yiij.web.actions.Action;
 import com.yiij.web.actions.InlineAction;
 
 public class Controller extends BaseController
 {
+	private String _id;
+	private Module _module;
+	private Action _action = null;
+	
+	public Controller(IContext context, String id, Module module)
+	{
+		super(context);
+		_id = id;
+		_module = module;
+	}
+
+	public Controller(IContext context, String id)
+	{
+		this(context, id, null);
+	}
+
+	public String getId()
+	{
+		return _id;
+	}
+	
+	public String getUniqueId()
+	{
+		return (_module != null) ?_module.getId()+"/"+_id : _id;
+	}
+	
+	public Module getModule()
+	{
+		return _module;
+	}
+	
+	public Action getAction()
+	{
+		return _action;
+	}
+	
+	public void setAction(Action value)
+	{
+		_action = value;
+	}
+	
 	public void run(String actionID) throws Exception
 	{
 		Action action = createAction(actionID);
