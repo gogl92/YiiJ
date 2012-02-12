@@ -16,9 +16,11 @@ import com.yiij.base.Module;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.base.interfaces.IWebApplication;
 import com.yiij.utils.StringHelper;
+import com.yiij.web.interfaces.IPluginViewRenderer;
 import com.yiij.web.interfaces.IViewRenderer;
 import com.yiij.web.interfaces.IWebModule;
 import com.yiij.web.actions.Action;
+import com.yiij.web.renderers.ClassRenderer;
 
 public class WebApplication extends Application implements IWebApplication, IWebModule
 {
@@ -32,11 +34,12 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	private UrlManager _urlManager;
 	private HttpRequest _request;
 	private HttpResponse _response;
-	private IViewRenderer _viewRenderer;
+	private IPluginViewRenderer _viewRenderer;
 	private Controller _controller;
 	private String _controllerPath;
 	private String _layoutPath;
 	private String _homeUrl;
+	private String _viewPackageName;
 	
 	public WebApplication(IContext context, ServletConfig servletConfig, HttpServletRequest servletRequest,
 			HttpServletResponse servletResponse)
@@ -175,12 +178,12 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	 * be replaced by this renderer.
 	 * @return the view renderer.
 	 */
-	public IViewRenderer getViewRenderer()
+	public IPluginViewRenderer getViewRenderer()
 	{
 		if (_viewRenderer == null)
 			try
 			{
-				_viewRenderer = (IViewRenderer) getComponent("viewRenderer");
+				_viewRenderer = (IPluginViewRenderer) getComponent("viewRenderer");
 			} catch (Exception e)
 			{
 				throw new com.yiij.base.Exception(e);
@@ -188,6 +191,34 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 		return _viewRenderer;
 	}
 
+	/**
+	 * Returns the view render suited for the controller and view.
+	 * If no plugin renderer is defined, returns a special class-based ClassRenderer.
+	 * @param controller
+	 * @param viewName
+	 * @return the view renderer.
+	 */
+	public IViewRenderer getViewRenderer(BaseController controller, String viewName)
+	{
+		IViewRenderer renderer = getViewRenderer();
+		if (renderer == null)
+		{
+			String viewPackage = controller.getViewPackageName();
+			String viewClassFile = viewPackage + "." + StringHelper.upperCaseFirst(viewName)+"View";
+			
+			try
+			{
+				Class<?> c = Class.forName(viewClassFile);
+				if (IViewRenderer.class.isAssignableFrom(c))
+					renderer = new ClassRenderer(viewClassFile); //(IViewRenderer)c.newInstance();
+			} catch (ClassNotFoundException e)
+			{
+				throw new com.yiij.base.Exception(e);
+			}
+		}
+		return renderer;
+	}
+	
 	/**
 	 * Creates the controller and performs the specified action.
 	 * @param route the route of the current request. See {@link #createController()} for more details.
@@ -355,6 +386,19 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	{
 		_controllerPath = value;
 	}
+	
+	public String getViewPackageName()
+	{
+		if (_viewPackageName == null)
+			_viewPackageName = getPackageName()+".views";
+		return _viewPackageName;
+	}
+	
+	public void setViewPackageName(String value)
+	{
+		_viewPackageName = value;
+	}
+	
 	
 	/**
 	 * @return the root directory of view files. Defaults to 'protected/views'.

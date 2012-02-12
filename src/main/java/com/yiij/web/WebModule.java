@@ -8,7 +8,8 @@ public class WebModule extends Module implements IWebModule
 {
 	private String _defaultController = "default";
 	private String _layout;
-	private String  _viewPath;
+	private String _viewPath;
+	private String _viewPackageName;
 
 	public WebModule(IContext context, String id, Module parent)
 	{
@@ -83,4 +84,15 @@ public class WebModule extends Module implements IWebModule
 		*/
 	}
 	
+	public String getViewPackageName()
+	{
+		if (_viewPackageName == null)
+			_viewPackageName = getPackageName()+".views";
+		return _viewPackageName;
+	}
+	
+	public void setViewPackageName(String value)
+	{
+		_viewPackageName = value;
+	}
 }

@@ -242,6 +242,14 @@ public class Controller extends BaseController
 	{
 		return _module;
 	}
+
+	public String getViewPackageName()
+	{
+		IWebModule module = getModule();
+		if (module == null)
+			module = webApp();
+		return module.getViewPackageName()+"."+getId();
+	}
 	
 	/**
 	 * Returns the directory containing view files for this controller.
@@ -320,13 +328,13 @@ public class Controller extends BaseController
 	 * </ul>
 	 * For absolute view and relative view, the corresponding view file is a PHP file
 	 * whose name is the same as the view name. The file is located under a specified directory.
-	 * This method will call {@link CApplication::findLocalizedFile} to search for a localized file, if any.
-	 * @param string $viewName the view name
-	 * @param string $viewPath the directory that is used to search for a relative view name
-	 * @param string $basePath the directory that is used to search for an absolute view name under the application
-	 * @param string $moduleViewPath the directory that is used to search for an absolute view name under the current module.
+	 * This method will call {@link Application#findLocalizedFile()} to search for a localized file, if any.
+	 * @param viewName the view name
+	 * @param viewPath the directory that is used to search for a relative view name
+	 * @param basePath the directory that is used to search for an absolute view name under the application
+	 * @param moduleViewPath the directory that is used to search for an absolute view name under the current module.
 	 * If this is not set, the application base view path will be used.
-	 * @return String the view file path. null if the view file does not exist.
+	 * @return the view file path. null if the view file does not exist. blank ("") if not file based.
 	 */
 	public String resolveViewFile(String viewName, String viewPath, String basePath, String moduleViewPath)
 	{
@@ -336,12 +344,10 @@ public class Controller extends BaseController
 		if(moduleViewPath == null)
 			moduleViewPath = basePath;
 
-		IViewRenderer renderer;
-		String extension;
-		if((renderer=webApp().getViewRenderer())!=null)
-			extension=renderer.getFileExtension();
-		else
-			extension=".java";
+		IViewRenderer renderer = webApp().getViewRenderer(this, viewName);
+		if (renderer.getFileExtension() == null)
+			return "";
+		String extension = renderer.getFileExtension();
 		
 		String viewFile;
 		if(viewName.startsWith("/"))
@@ -365,8 +371,9 @@ public class Controller extends BaseController
 			return null;
 	}
 	
-	
-	
+	/**
+	 * @see #renderText(String, boolean)
+	 */
 	public void renderText(String text) throws IOException
 	{
 		renderText(text, false);
@@ -395,5 +402,61 @@ public class Controller extends BaseController
 		return null;
 	}	
 
+	/**
+	 * @see #renderPartial(String, Object, boolean, boolean) 
+	 */
+	public String renderPartial(String view, Object data) throws IOException
+	{
+		return renderPartial(view, data, false, false);
+	}
+	
+	/**
+	 * @see #renderPartial(String, Object, boolean, boolean) 
+	 */
+	public String renderPartial(String view, Object data, boolean doReturn) throws IOException
+	{
+		return renderPartial(view, data, doReturn, false);
+	}
+	
+	/**
+	 * Renders a view.
+	 *
+	 * The named view refers to a PHP script (resolved via {@link getViewFile})
+	 * that is included by this method. If $data is an associative array,
+	 * it will be extracted as PHP variables and made available to the script.
+	 *
+	 * This method differs from {@link render()} in that it does not
+	 * apply a layout to the rendered result. It is thus mostly used
+	 * in rendering a partial view, or an AJAX response.
+	 *
+	 * @param string $view name of the view to be rendered. See {@link getViewFile} for details
+	 * about how the view script is resolved.
+	 * @param array $data data to be extracted into PHP variables and made available to the view script
+	 * @param boolean $return whether the rendering result should be returned instead of being displayed to end users
+	 * @param boolean $processOutput whether the rendering result should be postprocessed using {@link processOutput}.
+	 * @return string the rendering result. Null if the rendering result is not required.
+	 * @throws IOException 
+	 * @throws CException if the view does not exist
+	 * @see getViewFile
+	 * @see processOutput
+	 * @see render
+	 */
+	public String renderPartial(String view, Object data, boolean doReturn, boolean processOutput) throws IOException
+	{
+		String viewFile;
+		if((viewFile=getViewFile(view))!=null)
+		{
+			String output = webApp().getViewRenderer(this, view).renderFile(this, viewFile, data, doReturn);
+			if(processOutput)
+				output = processOutput(output);
+			if(doReturn)
+				return output;
+			else
+				webApp().getResponse().getWriter().print(output);
+			return null;
+		}
+		else
+			throw new com.yiij.base.Exception("{controller} cannot find the requested view '"+view+"'.");
+	}
 	
 }
