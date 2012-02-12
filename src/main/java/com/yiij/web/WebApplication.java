@@ -315,7 +315,7 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 
 			try
 			{
-				Class classClass = Class.forName(classFile);
+				Class<?> classClass = Class.forName(classFile);
 				if (Controller.class.isAssignableFrom(classClass))
 				{
 					return new Object[] { Component.newInstance(context(), classClass.getCanonicalName(), 

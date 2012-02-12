@@ -2,9 +2,7 @@ package com.yiij.web.renderers;
 
 import java.io.IOException;
 
-import com.yiij.base.interfaces.IContext;
 import com.yiij.web.BaseController;
-import com.yiij.web.WebApplicationComponent;
 import com.yiij.web.interfaces.IViewRenderer;
 
 public class ClassRenderer implements IViewRenderer

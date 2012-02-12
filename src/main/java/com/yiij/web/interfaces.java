@@ -2,6 +2,7 @@ package com.yiij.web;
 
 import java.io.IOException;
 
+import com.yiij.base.Module;
 import com.yiij.base.interfaces.IApplicationComponent;
 
 public class interfaces
@@ -14,6 +15,9 @@ public class interfaces
 		public String getViewPath();
 		public String getPackageName();
 		public String getViewPackageName();
+		public String getLayout();
+		public Module getParentModule();
+		public String getLayoutPath();
 	}
 	
 	public interface IWebComponent

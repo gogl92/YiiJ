@@ -9,6 +9,7 @@ public class WebModule extends Module implements IWebModule
 	private String _defaultController = "default";
 	private String _layout;
 	private String _viewPath;
+	private String _layoutPath;
 	private String _viewPackageName;
 
 	public WebModule(IContext context, String id, Module parent)
@@ -83,6 +84,33 @@ public class WebModule extends Module implements IWebModule
 				array('{path}'=>$path)));
 		*/
 	}
+	
+	/**
+	 * @return the root directory of layout files. Defaults to 'moduleDir/views/layouts' where
+	 * moduleDir is the directory containing the module class.
+	 */
+	public String getLayoutPath()
+	{
+		if(_layoutPath!=null)
+			return _layoutPath;
+		else
+			return _layoutPath=getViewPath()+"/layouts";
+	}
+
+	/**
+	 * @param path the root directory of layout files.
+	 * @throws Exception if the directory does not exist.
+	 */
+	public void setLayoutPath(String path)
+	{
+		_layoutPath = path;
+		/*
+		if(($this->_layoutPath=realpath($path))===false || !is_dir($this->_layoutPath))
+			throw new CException(Yii::t('yii','The layout path "{path}" is not a valid directory.',
+				array('{path}'=>$path)));
+		*/
+	}
+	
 	
 	public String getViewPackageName()
 	{

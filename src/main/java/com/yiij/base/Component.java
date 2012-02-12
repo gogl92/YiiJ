@@ -21,7 +21,7 @@ public class Component implements IComponent
 	}
 	
 	@SuppressWarnings({ "unchecked" })
-	public static IComponent newInstance(IContext context, Object config, Object[] arguments, Class[] types) throws 
+	public static IComponent newInstance(IContext context, Object config, Object[] arguments, Class<?>[] types) throws 
 		java.lang.Exception
 	{
 		String type = null;
@@ -48,7 +48,7 @@ public class Component implements IComponent
 			realArguments[ctarg+1] = arguments[ctarg];
 		}
 		
-		Class[] realTypes = null;
+		Class<?>[] realTypes = null;
 		if (types != null)
 		{
 			realTypes = new Class[types.length+1];

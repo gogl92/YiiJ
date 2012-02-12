@@ -4,10 +4,7 @@ import java.io.IOException;
 
 import javax.servlet.ServletOutputStream;
 
-import com.yiij.base.ApplicationComponent;
-import com.yiij.base.Exception;
 import com.yiij.base.interfaces.IContext;
-import com.yiij.base.interfaces.IWebApplication;
 
 public class HttpResponse extends WebApplicationComponent
 {

@@ -1,9 +1,14 @@
 package com.yiij.web;
 
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yiij.Root;
+import com.yiij.base.Application;
 import com.yiij.base.HttpException;
-import com.yiij.base.Module;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.utils.StringHelper;
 import com.yiij.web.interfaces.IViewRenderer;
@@ -311,6 +316,122 @@ public class Controller extends BaseController
 	}
 
 	/**
+	 * Looks for the layout view script based on the layout name.
+	 *
+	 * The layout name can be specified in one of the following ways:
+	 *
+	 * <ul>
+	 * <li>layout is false: returns false, meaning no layout.</li>
+	 * <li>layout is null: the currently active module's layout will be used. If there is no active module,
+	 * the application's layout will be used.</li>
+	 * <li>a regular view name.</li>
+	 * </ul>
+	 *
+	 * The resolution of the view file based on the layout view is similar to that in {@link getViewFile}.
+	 * In particular, the following rules are followed:
+	 *
+	 * Otherwise, this method will return the corresponding view file based on the following criteria:
+	 * <ul>
+	 * <li>When a theme is currently active, this method will call {@link CTheme::getLayoutFile} to determine
+	 * which view file should be returned.</li>
+	 * <li>absolute view within a module: the view name starts with a single slash '/'.
+	 * In this case, the view will be searched for under the currently active module's view path.
+	 * If there is no active module, the view will be searched for under the application's view path.</li>
+	 * <li>absolute view within the application: the view name starts with double slashes '//'.
+	 * In this case, the view will be searched for under the application's view path.
+	 * This syntax has been available since version 1.1.3.</li>
+	 * <li>aliased view: the view name contains dots and refers to a path alias.
+	 * The view file is determined by calling {@link YiiBase::getPathOfAlias()}. Note that aliased views
+	 * cannot be themed because they can refer to a view file located at arbitrary places.</li>
+	 * <li>relative view: otherwise. Relative views will be searched for under the currently active
+	 * module's layout path. In case when there is no active module, the view will be searched for
+	 * under the application's layout path.</li>
+	 * </ul>
+	 *
+	 * After the view file is identified, this method may further call {@link CApplication::findLocalizedFile}
+	 * to find its localized version if internationalization is needed.
+	 *
+	 * @param mixed $layoutName layout name
+	 * @return string the view file for the layout. False if the view file cannot be found
+	 */
+	public String getLayoutFile(String layoutName)
+	{
+		/*
+		if(layoutName != null && layoutName.equals(""))
+			return null;
+		//if((($theme=Yii::app()->getTheme())!==null || ($theme=Yii::app()->themeManager->getTheme($this->getModule()!==null?$this->getModule()->theme:null))!==null) && ($layoutFile=$theme->getLayoutFile($this,$layoutName))!==false)
+			//return $layoutFile;
+
+		IWebModule module;
+		if(layoutName == null)
+		{
+			module = getModule();
+			while(module!=null)
+			{
+				if(module.getLayout()!=null && module.getLayout().equals(""))
+					return null;
+				if(module.getLayout()!=null)
+					break;
+				module=(IWebModule)module.getParentModule();
+			}
+			if(module==null)
+				module=webApp();
+			layoutName=module.getLayout();
+		}
+		else if((module=this.getModule())==null)
+			module=webApp();
+		*/
+		
+		Object[] findLayout = resolveLayoutName(layoutName);
+		if (findLayout == null)
+			return null;
+		return resolveViewFile((String)findLayout[0],((IWebModule)findLayout[1]).getLayoutPath(),webApp().getViewPath(),((IWebModule)findLayout[1]).getViewPath());
+	}
+
+	/**
+	 * 
+	 * @param layoutName
+	 * @return 0=layoutName, 1=module
+	 */
+	private Object[] resolveLayoutName(String layoutName)
+	{
+		if(layoutName != null && layoutName.equals(""))
+			return null;
+		//if((($theme=Yii::app()->getTheme())!==null || ($theme=Yii::app()->themeManager->getTheme($this->getModule()!==null?$this->getModule()->theme:null))!==null) && ($layoutFile=$theme->getLayoutFile($this,$layoutName))!==false)
+			//return $layoutFile;
+
+		IWebModule module;
+		if(layoutName == null)
+		{
+			module = getModule();
+			while(module!=null)
+			{
+				if(module.getLayout()!=null && module.getLayout().equals(""))
+					return null;
+				if(module.getLayout()!=null)
+					break;
+				module=(IWebModule)module.getParentModule();
+			}
+			if(module==null)
+				module=webApp();
+			layoutName=module.getLayout();
+		}
+		else if((module=this.getModule())==null)
+			module=webApp();
+
+		return new Object[] { layoutName, module };
+	}
+	
+	private String resolveLayoutNameOnly(String layoutName)
+	{
+		Object[] ret = resolveLayoutName(layoutName);
+		if (ret == null)
+			return null;
+		return (String)ret[0];
+	}
+	
+	
+	/**
 	 * Finds a view file based on its name.
 	 * The view name can be in one of the following formats:
 	 * <ul>
@@ -369,6 +490,85 @@ public class Controller extends BaseController
 			//return Yii::app()->findLocalizedFile($viewFile.'.php');
 		else
 			return null;
+	}
+	
+	/**
+	 * @see #render(String, Object, boolean)
+	 * @throws IOException
+	 */
+	public String render(String view,Object data) throws IOException
+	{
+		return render(view, data, false);
+	}
+	
+	/**
+	 * Renders a view with a layout.
+	 *
+	 * This method first calls {@link renderPartial} to render the view (called content view).
+	 * It then renders the layout view which may embed the content view at appropriate place.
+	 * In the layout view, the content view rendering result can be accessed via variable
+	 * <code>$content</code>. At the end, it calls {@link processOutput} to insert scripts
+	 * and dynamic contents if they are available.
+	 *
+	 * By default, the layout view script is "protected/views/layouts/main.php".
+	 * This may be customized by changing {@link layout}.
+	 *
+	 * @param string $view name of the view to be rendered. See {@link getViewFile} for details
+	 * about how the view script is resolved.
+	 * @param array $data data to be extracted into PHP variables and made available to the view script
+	 * @param boolean $return whether the rendering result should be returned instead of being displayed to end users.
+	 * @return string the rendering result. Null if the rendering result is not required.
+	 * @throws IOException 
+	 * @see renderPartial
+	 * @see getLayoutFile
+	 */
+	public String render(String view,Object data, boolean doReturn) throws IOException
+	{
+		if(beforeRender(view))
+		{
+			String output = renderPartial(view,data,true);
+			String layoutFile;
+			if((layoutFile=getLayoutFile(getLayout()))!=null) 
+			{
+				Hashtable<String, String> lparams = new Hashtable<String, String>();
+				lparams.put("content", output);
+				output=renderFile(resolveLayoutNameOnly(getLayout()),layoutFile,lparams, true);
+			}
+
+			afterRender(view,output);
+
+			output=processOutput(output);
+
+			if(doReturn)
+				return output;
+			else
+				webApp().getResponse().getWriter().print(output);
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * This method is invoked at the beginning of {@link #render()}.
+	 * You may override this method to do some preprocessing when rendering a view.
+	 * @param view the view to be rendered
+	 * @return whether the view should be rendered.
+	 */
+	protected boolean beforeRender(String view)
+	{
+		return true;
+	}
+
+	/**
+	 * This method is invoked after the specified is rendered by calling {@link #render()}.
+	 * Note that this method is invoked BEFORE {@link #processOutput()}.
+	 * You may override this method to do some postprocessing for the view rendering.
+	 * @param view the view that has been rendered
+	 * @param output the rendering result of the view. Note that this parameter is passed
+	 * as a reference. That means you can modify it within this method.
+	 */
+	protected void afterRender(String view, String output)
+	{
 	}
 	
 	/**
@@ -457,6 +657,70 @@ public class Controller extends BaseController
 		}
 		else
 			throw new com.yiij.base.Exception("{controller} cannot find the requested view '"+view+"'.");
+	}
+	
+	/**
+	 * Creates a relative URL for the specified action defined in this controller.
+	 * @param route the URL route. This should be in the format of 'ControllerID/ActionID'.
+	 * If the ControllerID is not present, the current controller ID will be prefixed to the route.
+	 * If the route is empty, it is assumed to be the current action.
+	 * If the controller belongs to a module, the {@link CWebModule::getId module ID}
+	 * will be prefixed to the route. (If you do not want the module ID prefix, the route should start with a slash '/'.)
+	 * @param params additional GET parameters (name=>value). Both the name and value will be URL-encoded.
+	 * If the name is '#', the corresponding value will be treated as an anchor
+	 * and will be appended at the end of the URL.
+	 * @param ampersand the token separating name-value pairs in the URL.
+	 * @return the constructed URL
+	 */
+	public String createUrl(String route, Map<String, String> params, String ampersand)
+	{
+		IWebModule module;
+		if(route.equals(""))
+			route=getId()+"/"+getAction().getId();
+		else if(route.indexOf("/")==-1)
+			route=getId()+"/"+route;
+		if(!route.startsWith("/") && (module=getModule())!=null)
+			route=module.getId()+"/"+route;
+		return webApp().createUrl(StringUtils.strip(route, "/"), params, ampersand);
+	}	
+	
+	/**
+	 * Creates an absolute URL for the specified action defined in this controller.
+	 * @param route the URL route. This should be in the format of 'ControllerID/ActionID'.
+	 * If the ControllerPath is not present, the current controller ID will be prefixed to the route.
+	 * If the route is empty, it is assumed to be the current action.
+	 * @param params additional GET parameters (name=>value). Both the name and value will be URL-encoded.
+	 * @param schema schema to use (e.g. http, https). If empty, the schema used for the current request will be used.
+	 * @param ampersand the token separating name-value pairs in the URL.
+	 * @return the constructed URL
+	 */
+	public String createAbsoluteUrl(String route, Map<String, String> params, String schema, String ampersand)
+	{
+		String url=createUrl(route,params,ampersand);
+		if(url.startsWith("http"))
+			return url;
+		else
+			return webApp().getRequest().getHostInfo(schema)+url;
+	}
+	
+	/**
+	 * This method is invoked right before an action is to be executed (after all possible filters.)
+	 * You may override this method to do last-minute preparation for the action.
+	 * @param action the action to be executed.
+	 * @return whether the action should be executed.
+	 */
+	protected boolean beforeAction(Action action)
+	{
+		return true;
+	}
+
+	/**
+	 * This method is invoked right after an action is executed.
+	 * You may override this method to do some postprocessing for the action.
+	 * @param action the action just executed.
+	 */
+	protected void afterAction(Action action)
+	{
 	}
 	
 }

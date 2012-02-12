@@ -34,12 +34,12 @@ public abstract class BaseController extends WebComponent
 	}
 	
 	/**
-	 * Renders a view file.
+	 * Renders a view using a IViewRenderer.
 	 *
-	 * @param string $viewFile view file path
-	 * @param array $data data to be extracted and made available to the view
-	 * @param boolean $return whether the rendering result should be returned instead of being echoed
-	 * @return string the rendering result. Null if the rendering result is not required.
+	 * @param viewFile view file path
+	 * @param data data to be extracted and made available to the view
+	 * @param return whether the rendering result should be returned instead of being echoed
+	 * @return the rendering result. Null if the rendering result is not required.
 	 * @throws Exception if the view file does not exist
 	 * @throws IOException
 	 */
@@ -55,4 +55,20 @@ public abstract class BaseController extends WebComponent
 			throw new com.yiij.base.Exception(getClass().getCanonicalName()+" contains improperly nested widget tags in its view '"+viewFile+"'. A "+widget.getClass().getCanonicalName()+" widget does not have an endWidget() call.");
 		}
 	}
+	
+	/**
+	 * Renders a view file.
+	 *
+	 * @param view view name
+	 * @param viewFile view file path
+	 * @param data data to be extracted and made available to the view
+	 * @param return whether the rendering result should be returned instead of being echoed
+	 * @return the rendering result. Null if the rendering result is not required.
+	 * @throws Exception if the view file does not exist
+	 */
+	public String renderFile(String view, String viewFile, Object data, boolean doReturn) throws IOException
+	{
+		return renderWithRenderer(webApp().getViewRenderer(this, view), viewFile, data, doReturn);
+	}
+	
 }
