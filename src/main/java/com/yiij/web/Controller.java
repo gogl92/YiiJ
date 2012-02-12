@@ -22,11 +22,6 @@ public class Controller extends BaseController
 		_module = module;
 	}
 
-	public Controller(IContext context, String id)
-	{
-		this(context, id, null);
-	}
-
 	public String getId()
 	{
 		return _id;

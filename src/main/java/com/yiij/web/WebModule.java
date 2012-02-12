@@ -8,11 +8,6 @@ public class WebModule extends Module implements IWebModule
 {
 	private String _defaultController = "default";
 
-	public WebModule(IContext context, String id)
-	{
-		this(context, id, null);
-	}
-	
 	public WebModule(IContext context, String id, Module parent)
 	{
 		super(context, id, parent);

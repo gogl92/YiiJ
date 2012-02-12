@@ -6,6 +6,11 @@ public class AbstractContext implements IContext
 {
 	private Application _application;
 	
+	public AbstractContext()
+	{
+		this(null);
+	}
+
 	public AbstractContext(Application application)
 	{
 		super();
@@ -17,5 +22,10 @@ public class AbstractContext implements IContext
 	{
 		return _application;
 	}
-
+	
+	@Override
+	public void setApplication(Application application)
+	{
+		_application = application;
+	}
 }

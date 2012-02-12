@@ -6,6 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.yiij.base.AbstractContext;
 import com.yiij.base.Component;
 import com.yiij.base.ComponentConfig;
 import com.yiij.web.WebApplication;
@@ -20,7 +21,7 @@ public class Root
 			((ComponentConfig)config.get("application")).className = WebApplication.class.getCanonicalName();
 		try
 		{
-			return (WebApplication)Component.newInstance(null, config.containsKey("application")?config.get("application"):WebApplication.class.getCanonicalName(), request, response);
+			return (WebApplication)Component.newInstance(new AbstractContext(), config.containsKey("application")?config.get("application"):WebApplication.class.getCanonicalName(), request, response);
 		} catch (Exception e)
 		{
 			throw new ServletException(e);

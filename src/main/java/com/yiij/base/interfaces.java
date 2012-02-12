@@ -10,6 +10,7 @@ public class interfaces
 	public interface IContext
 	{
 		public Application getApplication();
+		public void setApplication(Application applcation);
 	}
 	
 	public interface IComponent
@@ -46,6 +47,6 @@ public class interfaces
 	public interface IWebApplication
 	{
 		HttpServletRequest getServletRequest();
-		HttpServletResponse getServletRresponse();
+		HttpServletResponse getServletResponse();
 	}
 }

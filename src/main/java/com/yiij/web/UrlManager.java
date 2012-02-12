@@ -8,7 +8,7 @@ import com.yiij.base.Exception;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.base.interfaces.IWebApplication;
 
-public class UrlManager extends ApplicationComponent
+public class UrlManager extends WebApplicationComponent
 {
 	public static final String GET_FORMAT="get";
 	public static final String PATH_FORMAT="path";
@@ -16,16 +16,12 @@ public class UrlManager extends ApplicationComponent
 	public String routeVar = "r";
 	public boolean caseSensitive = true; 
 	
-	private IWebApplication _webApplication;
 	private String _urlFormat = UrlManager.GET_FORMAT;
 	private String _baseUrl;
 	
 	public UrlManager(IContext context)
 	{
 		super(context);
-		if (!(context.getApplication() instanceof IWebApplication))
-			throw new Exception("UrlManager only works with IWebApplication");
-		_webApplication = (IWebApplication)context.getApplication();
 	}
 	
 	@Override

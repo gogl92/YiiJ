@@ -12,9 +12,8 @@ import com.yiij.base.Exception;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.base.interfaces.IWebApplication;
 
-public class HttpRequest extends ApplicationComponent
+public class HttpRequest extends WebApplicationComponent
 {
-	private IWebApplication _webApplication;
 	private String _hostInfo = null;
 	private String _baseUrl = null;
 	private Map<String, String> _params = new Hashtable<String, String>();
@@ -22,10 +21,6 @@ public class HttpRequest extends ApplicationComponent
 	public HttpRequest(IContext context)
 	{
 		super(context);
-		
-		if (!(context.getApplication() instanceof IWebApplication))
-			throw new Exception("HttpRequest only works with IWebApplication");
-		_webApplication = (IWebApplication)context.getApplication();
 	}
 
 	public String getParam(String name)
@@ -38,7 +33,7 @@ public class HttpRequest extends ApplicationComponent
 		if (_params.containsKey(name))
 			return _params.get(name);
 		
-		String ret = _webApplication.getServletRequest().getParameter(name);
+		String ret = webApp().getServletRequest().getParameter(name);
 		if (ret == null)
 			ret = defaultValue;
 		return ret;
@@ -77,7 +72,7 @@ public class HttpRequest extends ApplicationComponent
 	
 	public String getUrl()
 	{
-		return _webApplication.getServletRequest().getRequestURL().toString();
+		return webApp().getServletRequest().getRequestURL().toString();
 	}
 
 	public String getHostInfo()
@@ -95,11 +90,11 @@ public class HttpRequest extends ApplicationComponent
 				http="https";
 			else
 				http="http";
-			if(!_webApplication.getServletRequest().getLocalName().equals(""))
-				_hostInfo=http+"://"+_webApplication.getServletRequest().getLocalName();
+			if(!webApp().getServletRequest().getLocalName().equals(""))
+				_hostInfo=http+"://"+webApp().getServletRequest().getLocalName();
 			else
 			{
-				_hostInfo=http+"://"+_webApplication.getServletRequest().getServerName();
+				_hostInfo=http+"://"+webApp().getServletRequest().getServerName();
 				int port=secure ? getSecurePort() : getPort();
 				if((port!=80 && !secure) || (port!=443 && secure))
 					_hostInfo+=':'+port;
@@ -156,7 +151,7 @@ public class HttpRequest extends ApplicationComponent
 	
 	public String getPathInfo()
 	{
-		return _webApplication.getServletRequest().getPathInfo();
+		return webApp().getServletRequest().getPathInfo();
 	}
 	
 	public String urldecode(String value)
@@ -173,62 +168,62 @@ public class HttpRequest extends ApplicationComponent
 	
 	public String getRequestUri()
 	{
-		return _webApplication.getServletRequest().getRequestURI();
+		return webApp().getServletRequest().getRequestURI();
 	}
 	
 	public String getQueryString()
 	{
-		return _webApplication.getServletRequest().getQueryString();
+		return webApp().getServletRequest().getQueryString();
 	}
 	
 	public boolean getIsSecureConnection()
 	{
-		return _webApplication.getServletRequest().isSecure();
+		return webApp().getServletRequest().isSecure();
 	}
 	
 	public String getRequestType()
 	{
-		return _webApplication.getServletRequest().getMethod();
+		return webApp().getServletRequest().getMethod();
 	}
 	
 	public boolean getIsPostRequest()
 	{
-		return _webApplication.getServletRequest().getMethod().equals("POST");
+		return webApp().getServletRequest().getMethod().equals("POST");
 	}
 	
 	public String getServerName()
 	{
-		return _webApplication.getServletRequest().getServerName();
+		return webApp().getServletRequest().getServerName();
 	}
 	
 	public int getServerPort()
 	{
-		return _webApplication.getServletRequest().getServerPort();
+		return webApp().getServletRequest().getServerPort();
 	}
 	
 	public String getUrlReferrer()
 	{
-		return _webApplication.getServletRequest().getHeader("Referer");
+		return webApp().getServletRequest().getHeader("Referer");
 	}
 	
 	public String getUserAgent()
 	{
-		return _webApplication.getServletRequest().getHeader("User-Agent");
+		return webApp().getServletRequest().getHeader("User-Agent");
 	}
 	
 	public String getUserHostAddress()
 	{
-		return _webApplication.getServletRequest().getRemoteAddr();
+		return webApp().getServletRequest().getRemoteAddr();
 	}
 	
 	public String getUserHost()
 	{
-		return _webApplication.getServletRequest().getRemoteHost();
+		return webApp().getServletRequest().getRemoteHost();
 	}
 	
 	public String getAcceptTypes()
 	{
-		return _webApplication.getServletRequest().getHeader("Accept");
+		return webApp().getServletRequest().getHeader("Accept");
 	}
 	
 	private Integer _port = null;
@@ -236,7 +231,7 @@ public class HttpRequest extends ApplicationComponent
 	public int getPort()
 	{
 		if (_port == null)
-			_port = !getIsSecureConnection() ? _webApplication.getServletRequest().getServerPort() : 80;
+			_port = !getIsSecureConnection() ? webApp().getServletRequest().getServerPort() : 80;
 		return _port;
 	}
 	
@@ -251,7 +246,7 @@ public class HttpRequest extends ApplicationComponent
 	public int getSecurePort()
 	{
 		if (_securePort == null)
-			_securePort = getIsSecureConnection() ? _webApplication.getServletRequest().getServerPort() : 443;
+			_securePort = getIsSecureConnection() ? webApp().getServletRequest().getServerPort() : 443;
 		return _securePort;
 	}
 	

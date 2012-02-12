@@ -7,4 +7,9 @@ public class interfaces
 		public String getDefaultController();
 		//public String getControllerPath();
 	}
+	
+	public interface IWebComponent
+	{
+		public WebApplication webApp();
+	}
 }

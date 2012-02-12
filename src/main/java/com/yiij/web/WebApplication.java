@@ -22,6 +22,10 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	private HttpServletRequest _servletRequest;
 	private HttpServletResponse _servletResponse;
 
+	private UrlManager _urlManager = null;
+	private HttpRequest _request = null;
+	private HttpResponse _response = null;
+	
 	public WebApplication(IContext context, HttpServletRequest servletRequest,
 			HttpServletResponse servletResponse)
 	{
@@ -151,14 +155,25 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	
 	public UrlManager getUrlManager() throws java.lang.Exception
 	{
-		return (UrlManager) getComponent("urlManager");
+		if (_urlManager == null)
+			_urlManager = (UrlManager) getComponent("urlManager");
+		return _urlManager;
 	}
 
 	public HttpRequest getRequest() throws java.lang.Exception
 	{
-		return (HttpRequest) getComponent("request");
+		if (_request == null)
+			_request = (HttpRequest) getComponent("request");
+		return _request;
 	}
 
+	public HttpResponse getResponse() throws java.lang.Exception
+	{
+		if (_response == null)
+			_response = (HttpResponse) getComponent("response");
+		return _response;
+	}
+	
 	@Override
 	protected void registerCoreComponents()
 	{
@@ -167,6 +182,7 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 		ComponentConfig config = new ComponentConfig();
 		config.put("urlManager", new ComponentConfig("com.yiij.web.UrlManager"));
 		config.put("request", new ComponentConfig("com.yiij.web.HttpRequest"));
+		config.put("response", new ComponentConfig("com.yiij.web.HttpResponse"));
 		
 		setComponents(config);
 		
@@ -181,7 +197,7 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	}
 
 	@Override
-	public HttpServletResponse getServletRresponse()
+	public HttpServletResponse getServletResponse()
 	{
 		return _servletResponse;
 	}

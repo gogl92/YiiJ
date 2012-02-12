@@ -11,6 +11,9 @@ public abstract class Application extends Module
 	public Application(IContext context)
 	{
 		super(context, "", null);
+		
+		context.setApplication(this);
+		
 		registerCoreComponents();
 	}
 

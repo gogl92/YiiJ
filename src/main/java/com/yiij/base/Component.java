@@ -42,7 +42,7 @@ public class Component implements IComponent
 		Class<Component> cclass = (Class<Component>) Class.forName(type);
 		
 		Object[] realArguments = new Object[arguments.length+1];
-		realArguments[0] = context!=null ? context : new AbstractContext(null);
+		realArguments[0] = context;
 		for (int ctarg = 0; ctarg < arguments.length; ctarg++ )
 		{
 			realArguments[ctarg+1] = arguments[ctarg];
