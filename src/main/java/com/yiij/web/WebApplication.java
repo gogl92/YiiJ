@@ -153,24 +153,42 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 			return pathInfo;		
 	}
 	
-	public UrlManager getUrlManager() throws java.lang.Exception
+	public UrlManager getUrlManager()
 	{
 		if (_urlManager == null)
-			_urlManager = (UrlManager) getComponent("urlManager");
+			try
+			{
+				_urlManager = (UrlManager) getComponent("urlManager");
+			} catch (Exception e)
+			{
+				_urlManager = null; // should never happen
+			}
 		return _urlManager;
 	}
 
-	public HttpRequest getRequest() throws java.lang.Exception
+	public HttpRequest getRequest()
 	{
 		if (_request == null)
-			_request = (HttpRequest) getComponent("request");
+			try
+			{
+				_request = (HttpRequest) getComponent("request");
+			} catch (Exception e)
+			{
+				_request = null; // should never happen
+			}
 		return _request;
 	}
 
-	public HttpResponse getResponse() throws java.lang.Exception
+	public HttpResponse getResponse()
 	{
 		if (_response == null)
-			_response = (HttpResponse) getComponent("response");
+			try
+			{
+				_response = (HttpResponse) getComponent("response");
+			} catch (Exception e)
+			{
+				_response = null; // should never happe
+			}
 		return _response;
 	}
 	

@@ -3,10 +3,7 @@ package com.yiij.web;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.yiij.base.ApplicationComponent;
-import com.yiij.base.Exception;
 import com.yiij.base.interfaces.IContext;
-import com.yiij.base.interfaces.IWebApplication;
 
 public class UrlManager extends WebApplicationComponent
 {
@@ -32,6 +29,23 @@ public class UrlManager extends WebApplicationComponent
 	}
 
 	/**
+	 * Returns the base URL of the application.
+	 * @return String the base URL of the application (the part after host name and before query string).
+	 * If {@link showScriptName} is true, it will include the script name part.
+	 * Otherwise, it will not, and the ending slashes are stripped off.
+	 */
+	public String getBaseUrl()
+	{
+		if(_baseUrl!=null)
+			return _baseUrl;
+		else
+		{
+			_baseUrl = webApp().getRequest().getBaseUrl();
+			return _baseUrl;
+		}		
+	}
+	
+	/**
 	 * Parses the user request.
 	 * @param CHttpRequest $request the request application component
 	 * @return string the route (controllerID/actionID) and perhaps GET parameters in path format.
@@ -50,7 +64,7 @@ public class UrlManager extends WebApplicationComponent
 			return "";
 	}	
 	
-	public void parsePathInfo(String pathInfo) throws java.lang.Exception
+	public void parsePathInfo(String pathInfo)
 	{
         Pattern pattern = Pattern.compile("\\[(.*?)\\]");
         Matcher m;
@@ -65,6 +79,7 @@ public class UrlManager extends WebApplicationComponent
 			if(key.equals("")) continue;
 			String value = segs[i+1];
 			m=pattern.matcher(key);
+			@SuppressWarnings("unused")
 			int pos;
 			if((pos = key.indexOf("["))!=-1 && m.find())
 			{

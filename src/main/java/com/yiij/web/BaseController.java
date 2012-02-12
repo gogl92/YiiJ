@@ -1,6 +1,5 @@
 package com.yiij.web;
 
-import com.yiij.base.Component;
 import com.yiij.base.interfaces.IContext;
 
 public abstract class BaseController extends WebComponent

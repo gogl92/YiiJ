@@ -7,10 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yiij.base.ApplicationComponent;
-import com.yiij.base.Exception;
 import com.yiij.base.interfaces.IContext;
-import com.yiij.base.interfaces.IWebApplication;
 
 public class HttpRequest extends WebApplicationComponent
 {
@@ -129,24 +126,34 @@ public class HttpRequest extends WebApplicationComponent
 		_hostInfo = StringUtils.stripEnd(value, "/");
 	}
 	
+	/**
+	 * Returns the relative URL for the application.
+	 * This is similar to {@link getScriptUrl scriptUrl} except that
+	 * it does not have the script file name, and the ending slashes are stripped off.
+	 * @return String the relative URL for the application
+	 */
 	public String getBaseUrl()
 	{
-		/*
+		return getBaseUrl(false);
+	}
+	
+	/**
+	 * Returns the relative URL for the application.
+	 * This is similar to {@link getScriptUrl scriptUrl} except that
+	 * it does not have the script file name, and the ending slashes are stripped off.
+	 * @param boolean $absolute whether to return an absolute URL. Defaults to false, meaning returning a relative one.
+	 * @return String the relative URL for the application
+	 */
+	public String getBaseUrl(boolean absolute)
+	{
 		if(_baseUrl == null)
-			_baseUrl = StringUtils.stripEnd(dirname($this->getScriptUrl()),"\\/");
-		return $absolute ? $this->getHostInfo() . $this->_baseUrl : $this->_baseUrl;
-		*/
-		return null;
+			_baseUrl = webApp().getServletRequest().getContextPath(); //StringUtils.stripEnd(dirname($this->getScriptUrl()),"\\/");
+		return absolute ? getHostInfo() + _baseUrl : _baseUrl;
 	}
 	
 	public void setBaseUrl(String value)
 	{
 		_baseUrl = value;
-	}
-	
-	public String getScriptUrl()
-	{
-		return null;
 	}
 	
 	public String getPathInfo()
