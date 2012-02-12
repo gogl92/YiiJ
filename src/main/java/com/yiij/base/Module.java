@@ -9,7 +9,7 @@ import com.yiij.base.interfaces.IContext;
 public class Module extends Component
 {
 	private String _id;
-	private String _packageName;
+	private String _packageName = null;
 	private Module _parentModule;
 	private Map<String, Module> _modules = new Hashtable<String, Module>(); 
 	private Map<String, ComponentConfig> _moduleConfig = new Hashtable<String, ComponentConfig>(); 
@@ -30,6 +30,8 @@ public class Module extends Component
 	
 	public String getPackageName()
 	{
+		if (_packageName == null)
+			_packageName = getClass().getPackage().getName();
 		return _packageName;
 	}
 	

@@ -2,19 +2,22 @@ package com.yiij.web;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Hashtable;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.yiij.base.ApplicationComponent;
+import com.yiij.base.Exception;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.base.interfaces.IWebApplication;
-import com.yiij.base.Exception;
 
 public class HttpRequest extends ApplicationComponent
 {
 	private IWebApplication _webApplication;
 	private String _hostInfo = null;
 	private String _baseUrl = null;
+	private Map<String, String> _params = new Hashtable<String, String>();
 	
 	public HttpRequest(IContext context)
 	{
@@ -32,10 +35,24 @@ public class HttpRequest extends ApplicationComponent
 	
 	public String getParam(String name, String defaultValue)
 	{
+		if (_params.containsKey(name))
+			return _params.get(name);
+		
 		String ret = _webApplication.getServletRequest().getParameter(name);
 		if (ret == null)
 			ret = defaultValue;
 		return ret;
+	}
+
+	public void setParam(String name, String value)
+	{
+		if (value == null)
+		{
+			if (_params.containsKey(name))
+				_params.remove(name);
+		}
+		else
+			_params.put(name, value);
 	}
 	
 	public String getQuery(String name)

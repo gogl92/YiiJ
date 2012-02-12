@@ -13,9 +13,15 @@ import com.yiij.base.interfaces.IContext;
 public class Component implements IComponent
 {
 	private IContext _context;
+
+	public static IComponent newInstance(IContext context, Object config, Object... arguments) throws 
+		java.lang.Exception
+	{
+		return Component.newInstance(context, config, arguments, null);
+	}
 	
 	@SuppressWarnings({ "unchecked" })
-	public static IComponent newInstance(IContext context, Object config, Object... arguments) throws 
+	public static IComponent newInstance(IContext context, Object config, Object[] arguments, Class[] types) throws 
 		java.lang.Exception
 	{
 		String type = null;
@@ -42,7 +48,22 @@ public class Component implements IComponent
 			realArguments[ctarg+1] = arguments[ctarg];
 		}
 		
-		Component object = (Component)ConstructorUtils.invokeConstructor(cclass, realArguments);
+		Class[] realTypes = null;
+		if (types != null)
+		{
+			realTypes = new Class[types.length+1];
+			realTypes[0] = IContext.class;
+			for (int ctarg = 0; ctarg < types.length; ctarg++ )
+			{
+				realTypes[ctarg+1] = types[ctarg];
+			}
+		}
+		
+		Component object;
+		if (types == null)
+			object = (Component)ConstructorUtils.invokeConstructor(cclass, realArguments);
+		else
+			object = (Component)ConstructorUtils.invokeExactConstructor(cclass, realArguments, realTypes);
 		
 		if (context == null && object instanceof Application)
 		{

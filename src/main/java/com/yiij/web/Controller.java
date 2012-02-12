@@ -3,11 +3,14 @@ package com.yiij.web;
 import com.yiij.base.HttpException;
 import com.yiij.base.Module;
 import com.yiij.base.interfaces.IContext;
+import com.yiij.utils.StringHelper;
 import com.yiij.web.actions.Action;
 import com.yiij.web.actions.InlineAction;
 
 public class Controller extends BaseController
 {
+	public String defaultAction = "index";
+	
 	private String _id;
 	private Module _module;
 	private Action _action = null;
@@ -90,12 +93,15 @@ public class Controller extends BaseController
 	
 	public Action createAction(String actionID) throws Exception
 	{
-		String actionMethodName = "action"+actionID.substring(0,1).toUpperCase() + actionID.substring(1);
+		if (actionID.equals(""))
+			actionID = defaultAction;
+		
+		String actionMethodName = "action"+StringHelper.upperCaseFirst(actionID);
 		try
 		{
 			getClass().getMethod(actionMethodName, new Class[] {});
 			
-			return new InlineAction(this, actionMethodName);
+			return new InlineAction(this, actionID);
 		} catch (SecurityException e)
 		{
 		} catch (NoSuchMethodException e)
