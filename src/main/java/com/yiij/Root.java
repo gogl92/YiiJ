@@ -2,6 +2,7 @@ package com.yiij;
 
 import java.io.IOException;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,7 +14,9 @@ import com.yiij.web.WebApplication;
 
 public class Root
 {
-	public static WebApplication createWebApplication(ComponentConfig config, HttpServletRequest request, HttpServletResponse response) 
+	public static WebApplication createWebApplication(ComponentConfig config, 
+			ServletConfig servletConfig,
+			HttpServletRequest request, HttpServletResponse response) 
 			throws ServletException, IOException
 	{
 		if (config.containsKey("application") && (
@@ -21,7 +24,9 @@ public class Root
 			((ComponentConfig)config.get("application")).className = WebApplication.class.getCanonicalName();
 		try
 		{
-			return (WebApplication)Component.newInstance(new AbstractContext(), config.containsKey("application")?config.get("application"):WebApplication.class.getCanonicalName(), request, response);
+			return (WebApplication)Component.newInstance(new AbstractContext(), 
+					config.containsKey("application")?config.get("application"):WebApplication.class.getCanonicalName(), 
+					servletConfig, request, response);
 		} catch (Exception e)
 		{
 			throw new ServletException(e);

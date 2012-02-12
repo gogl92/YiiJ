@@ -46,6 +46,15 @@ public class HttpRequest extends WebApplicationComponent
 		else
 			_params.put(name, value);
 	}
+
+	/*
+	public String getParamMap()
+	{
+		Map<String, String[]> ret = webApp().getServletRequest().getParameterMap();
+		
+		return ret;
+	}
+	*/
 	
 	public String getQuery(String name)
 	{
@@ -124,6 +133,11 @@ public class HttpRequest extends WebApplicationComponent
 	public void setHostInfo(String value)
 	{
 		_hostInfo = StringUtils.stripEnd(value, "/");
+	}
+	
+	public String getBasePath()
+	{
+		return webApp().getServletConfig().getServletContext().getRealPath("/");
 	}
 	
 	/**

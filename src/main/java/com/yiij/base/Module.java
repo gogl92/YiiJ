@@ -5,9 +5,12 @@ import java.util.Map;
 
 import com.yiij.base.interfaces.IApplicationComponent;
 import com.yiij.base.interfaces.IContext;
+import com.yiij.utils.FileHelper;
+import com.yiij.web.WebApplication;
 
 public class Module extends Component
 {
+	private String _basePath;
 	private String _id;
 	private String _packageName = null;
 	private Module _parentModule;
@@ -27,6 +30,48 @@ public class Module extends Component
 	{
 		return _id;
 	}
+	
+	public void setId(String value)
+	{
+		_id = value;
+	}
+	
+	/**
+	 * Returns the root directory of the module.
+	 * @return string the root directory of the module. Defaults to the directory containing the module class.
+	 */
+	public String getBasePath()
+	{
+		if(_basePath==null)
+		{
+			if (_parentModule == null)
+				_basePath = "";
+			else
+				_basePath = _parentModule.getBasePath()+"/"+_id;
+			
+			//$class=new ReflectionClass(get_class($this));
+			//$this->_basePath=dirname($class->getFileName());
+		}
+		return _basePath;
+	}
+	
+	/**
+	 * Sets the root directory of the application.
+	 * This method can only be invoked at the begin of the constructor.
+	 * @param string $path the root directory of the application.
+	 * @throws CException if the directory does not exist.
+	 */
+	public void setBasePath(String path)
+	{
+		_basePath = path;
+		/*
+		if(($this->_basePath=realpath($path))===false || !is_dir($this->_basePath))
+			throw new CException(Yii::t('yii','Application base path "{path}" is not a valid directory.',
+				array('{path}'=>$path)));
+        $this->_autoBasePathUrl = null;
+        */
+	}
+	
 	
 	public String getPackageName()
 	{

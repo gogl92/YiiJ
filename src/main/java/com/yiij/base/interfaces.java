@@ -1,5 +1,6 @@
 package com.yiij.base;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -46,6 +47,7 @@ public class interfaces
 	
 	public interface IWebApplication
 	{
+		ServletConfig getServletConfig();
 		HttpServletRequest getServletRequest();
 		HttpServletResponse getServletResponse();
 	}

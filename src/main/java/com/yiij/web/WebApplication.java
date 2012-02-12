@@ -1,5 +1,6 @@
 package com.yiij.web;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -17,32 +18,64 @@ import com.yiij.web.interfaces.IWebModule;
 
 public class WebApplication extends Application implements IWebApplication, IWebModule
 {
-	private String _defaultController = "site";
-	
+	private ServletConfig _servletConfig;
 	private HttpServletRequest _servletRequest;
 	private HttpServletResponse _servletResponse;
 
+	private String _viewPath;
+	private String _defaultController = "site";
+	private String _layout = "main";
 	private UrlManager _urlManager = null;
 	private HttpRequest _request = null;
 	private HttpResponse _response = null;
 	
-	public WebApplication(IContext context, HttpServletRequest servletRequest,
+	public WebApplication(IContext context, ServletConfig servletConfig, HttpServletRequest servletRequest,
 			HttpServletResponse servletResponse)
 	{
 		super(context);
+		_servletConfig = servletConfig;
 		_servletRequest = servletRequest;
 		_servletResponse = servletResponse;
+		
+		setBasePath(_servletConfig.getServletContext().getRealPath("/"));
 	}
 
+	/**
+	 * @return String the route of the default controller, action or module. Defaults to 'site'.
+	 */
 	@Override
 	public String getDefaultController()
 	{
 		return _defaultController;
 	}
 
+	/**
+	 * @see #getDefaultController()
+	 * @param String
+	 */
 	public void setDefaultController(String value)
 	{
 		_defaultController = value;
+	}
+	
+	
+	/**
+	 * The application-wide layout. Defaults to 'main' (relative to {@link getLayoutPath layoutPath}).
+	 * If this is blank, then no layout will be used.
+	 * @return String
+	 */
+	public String getLayout()
+	{
+		return _layout;
+	}
+	
+	/**
+	 * @see #getLayout()
+	 * @param String
+	 */
+	public void setLayout(String value)
+	{
+		_layout = value;
 	}
 	
 	@Override
@@ -82,12 +115,12 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	{
 		if (owner == null)
 			owner = this;
+		if (!(owner instanceof IWebModule))
+			throw new com.yiij.base.Exception("Controller can only be added to IWebModule classes");
+		
 		if (StringUtils.stripEnd(route, "/").equals(""))
 		{
-			if (owner instanceof IWebModule)
-				route = ((IWebModule)owner).getDefaultController();
-			else
-				route = "default";
+			route = ((IWebModule)owner).getDefaultController();
 		}
 		boolean caseSensitive = getUrlManager().caseSensitive;
 		String basePath = null;
@@ -125,7 +158,7 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 				{
 					return new Object[] { Component.newInstance(context(), classClass.getCanonicalName(), 
 							new Object[] {controllerID+id, owner==this?null:owner},
-							new Class[] {String.class, Module.class}),
+							new Class[] {String.class, IWebModule.class}),
 							parseActionParams(route) };
 				}
 				return null;
@@ -208,6 +241,37 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 		//setComponent("request", new HttpRequest(this));
 	}
 
+	/**
+	 * @return the root directory of view files. Defaults to 'protected/views'.
+	 */
+	public String getViewPath()
+	{
+		if(_viewPath!=null)
+			return _viewPath;
+		else
+			return _viewPath=getBasePath()+"/"+"views";
+	}
+
+	/**
+	 * @param path the root directory of view files.
+	 * @throws Exception if the directory does not exist.
+	 */
+	public void setViewPath(String path)
+	{
+		_viewPath = path;
+		/*
+		if(($this->_viewPath=realpath($path))===false || !is_dir($this->_viewPath))
+			throw new CException(Yii::t('yii','The view path "{path}" is not a valid directory.',
+				array('{path}'=>$path)));
+		*/
+	}
+	
+	@Override
+	public ServletConfig getServletConfig()
+	{
+		return _servletConfig;
+	}
+	
 	@Override
 	public HttpServletRequest getServletRequest()
 	{
