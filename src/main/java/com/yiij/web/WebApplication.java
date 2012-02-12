@@ -1,5 +1,7 @@
 package com.yiij.web;
 
+import java.util.Map;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +16,9 @@ import com.yiij.base.Module;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.base.interfaces.IWebApplication;
 import com.yiij.utils.StringHelper;
+import com.yiij.web.interfaces.IViewRenderer;
 import com.yiij.web.interfaces.IWebModule;
+import com.yiij.web.actions.Action;
 
 public class WebApplication extends Application implements IWebApplication, IWebModule
 {
@@ -25,9 +29,14 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	private String _viewPath;
 	private String _defaultController = "site";
 	private String _layout = "main";
-	private UrlManager _urlManager = null;
-	private HttpRequest _request = null;
-	private HttpResponse _response = null;
+	private UrlManager _urlManager;
+	private HttpRequest _request;
+	private HttpResponse _response;
+	private IViewRenderer _viewRenderer;
+	private Controller _controller;
+	private String _controllerPath;
+	private String _layoutPath;
+	private String _homeUrl;
 	
 	public WebApplication(IContext context, ServletConfig servletConfig, HttpServletRequest servletRequest,
 			HttpServletResponse servletResponse)
@@ -41,7 +50,7 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	}
 
 	/**
-	 * @return String the route of the default controller, action or module. Defaults to 'site'.
+	 * @return the route of the default controller, action or module. Defaults to 'site'.
 	 */
 	@Override
 	public String getDefaultController()
@@ -51,7 +60,7 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 
 	/**
 	 * @see #getDefaultController()
-	 * @param String
+	 * @param
 	 */
 	public void setDefaultController(String value)
 	{
@@ -62,7 +71,7 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	/**
 	 * The application-wide layout. Defaults to 'main' (relative to {@link getLayoutPath layoutPath}).
 	 * If this is blank, then no layout will be used.
-	 * @return String
+	 * @return
 	 */
 	public String getLayout()
 	{
@@ -71,13 +80,18 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 	
 	/**
 	 * @see #getLayout()
-	 * @param String
+	 * @param
 	 */
 	public void setLayout(String value)
 	{
 		_layout = value;
 	}
 	
+	/**
+	 * Processes the current request.
+	 * It first resolves the request into controller and action,
+	 * and then creates the controller to perform the action.
+	 */
 	@Override
 	public void processRequest() throws Exception
 	{
@@ -85,6 +99,100 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 		runController(route);
 	}
 
+	/**
+	 * Registers the core application components.
+	 * This method overrides the parent implementation by registering additional core components.
+	 * @see #setComponents()
+	 */
+	@Override
+	protected void registerCoreComponents()
+	{
+		super.registerCoreComponents();
+		
+		ComponentConfig config = new ComponentConfig();
+		config.put("urlManager", new ComponentConfig("com.yiij.web.UrlManager"));
+		config.put("request", new ComponentConfig("com.yiij.web.HttpRequest"));
+		config.put("response", new ComponentConfig("com.yiij.web.HttpResponse"));
+		
+		setComponents(config);
+	}
+	
+	/**
+	 * Returns the request component.
+	 * @return the request component
+	 */
+	public HttpRequest getRequest()
+	{
+		if (_request == null)
+			try
+			{
+				_request = (HttpRequest) getComponent("request");
+			} catch (Exception e)
+			{
+				_request = null; // should never happen
+			}
+		return _request;
+	}
+
+	/**
+	 * Returns the response component.
+	 * @return the response component
+	 */
+	public HttpResponse getResponse()
+	{
+		if (_response == null)
+			try
+			{
+				_response = (HttpResponse) getComponent("response");
+			} catch (Exception e)
+			{
+				_response = null; // should never happe
+			}
+		return _response;
+	}
+	
+	/**
+	 * Returns the URL manager component.
+	 * @return the URL manager component
+	 */
+	public UrlManager getUrlManager()
+	{
+		if (_urlManager == null)
+			try
+			{
+				_urlManager = (UrlManager) getComponent("urlManager");
+			} catch (Exception e)
+			{
+				_urlManager = null; // should never happen
+			}
+		return _urlManager;
+	}
+	
+	/**
+	 * Returns the view renderer.
+	 * If this component is registered and enabled, the default
+	 * view rendering logic defined in {@link BaseController} will
+	 * be replaced by this renderer.
+	 * @return the view renderer.
+	 */
+	public IViewRenderer getViewRenderer()
+	{
+		if (_viewRenderer == null)
+			try
+			{
+				_viewRenderer = (IViewRenderer) getComponent("viewRenderer");
+			} catch (Exception e)
+			{
+				throw new com.yiij.base.Exception(e);
+			}
+		return _viewRenderer;
+	}
+
+	/**
+	 * Creates the controller and performs the specified action.
+	 * @param route the route of the current request. See {@link #createController()} for more details.
+	 * @throws HttpException if the controller could not be created.
+	 */
 	public void runController(String route) throws Exception
 	{
 		Object[] ca = createController(route);
@@ -106,11 +214,34 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 		
 	}
 
+	/**
+	 * @see #createController(String, Module)
+	 */
 	public Object[] createController(String route) throws java.lang.Exception
 	{
 		return createController(route, null);
 	}
 	
+	/**
+	 * Creates a controller instance based on a route.
+	 * The route should contain the controller ID and the action ID.
+	 * It may also contain additional GET variables. All these must be concatenated together with slashes.
+	 *
+	 * This method will attempt to create a controller in the following order:
+	 * <ol>
+	 * <li>If the first segment is found in {@link #getControllerMap()}, the corresponding
+	 * controller configuration will be used to create the controller;</li>
+	 * <li>If the first segment is found to be a module ID, the corresponding module
+	 * will be used to create the controller;</li>
+	 * <li>Otherwise, it will search under the {@link #getControllerPath()} to create
+	 * the corresponding controller. For example, if the route is "admin/user/create",
+	 * then the controller will be created using the class file "protected/controllers/admin/UserController.php".</li>
+	 * </ol>
+	 * @param route the route of the request.
+	 * @param owner the module that the new controller will belong to. Defaults to null, meaning the application
+	 * instance is the owner.
+	 * @return the controller instance and the action ID. Null if the controller class does not exist or the route is invalid.
+	 */
 	public Object[] createController(String route, Module owner) throws java.lang.Exception
 	{
 		if (owner == null)
@@ -168,10 +299,13 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 			//basePath = "/" + id;
 		}
 		return null;
-		
-		//return new Object[] { new Controller(context(), "home"), "index" };
 	}
 	
+	/**
+	 * Parses a path info into an action ID and GET variables.
+	 * @param pathInfo path info
+	 * @return action ID
+	 */
 	protected String parseActionParams(String pathInfo) throws Exception
 	{
 		int pos;
@@ -186,61 +320,42 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 			return pathInfo;		
 	}
 	
-	public UrlManager getUrlManager()
+	/**
+	 * @return the currently active controller
+	 */
+	public Controller getController()
 	{
-		if (_urlManager == null)
-			try
-			{
-				_urlManager = (UrlManager) getComponent("urlManager");
-			} catch (Exception e)
-			{
-				_urlManager = null; // should never happen
-			}
-		return _urlManager;
+		return _controller;
 	}
 
-	public HttpRequest getRequest()
+	/**
+	 * @param value the currently active controller
+	 */
+	public void setController(Controller value)
 	{
-		if (_request == null)
-			try
-			{
-				_request = (HttpRequest) getComponent("request");
-			} catch (Exception e)
-			{
-				_request = null; // should never happen
-			}
-		return _request;
-	}
-
-	public HttpResponse getResponse()
-	{
-		if (_response == null)
-			try
-			{
-				_response = (HttpResponse) getComponent("response");
-			} catch (Exception e)
-			{
-				_response = null; // should never happe
-			}
-		return _response;
+		_controller=value;
 	}
 	
-	@Override
-	protected void registerCoreComponents()
+	/**
+	 * @return the package name that contains the controller classes. Defaults to 'protected/controllers'.
+	 */
+	public String getControllerPath()
 	{
-		super.registerCoreComponents();
-		
-		ComponentConfig config = new ComponentConfig();
-		config.put("urlManager", new ComponentConfig("com.yiij.web.UrlManager"));
-		config.put("request", new ComponentConfig("com.yiij.web.HttpRequest"));
-		config.put("response", new ComponentConfig("com.yiij.web.HttpResponse"));
-		
-		setComponents(config);
-		
-		//setComponent("urlManager", new UrlManager());
-		//setComponent("request", new HttpRequest(this));
+		if(_controllerPath!=null)
+			return _controllerPath;
+		else
+			return _controllerPath=getPackageName();
 	}
 
+	/**
+	 * @param value the package name that contains the controller classes.
+	 * @throws Exception if the directory is invalid
+	 */
+	public void setControllerPath(String value)
+	{
+		_controllerPath = value;
+	}
+	
 	/**
 	 * @return the root directory of view files. Defaults to 'protected/views'.
 	 */
@@ -265,6 +380,175 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 				array('{path}'=>$path)));
 		*/
 	}
+
+	/**
+	 * @return the root directory of layout files. Defaults to 'protected/views/layouts'.
+	 */
+	public String getLayoutPath()
+	{
+		if(_layoutPath!=null)
+			return _layoutPath;
+		else
+			return _layoutPath=getViewPath()+"/layouts";
+	}
+	
+	/**
+	 * @param path the root directory of layout files.
+	 * @throws Exception if the directory does not exist.
+	 */
+	public void setLayoutPath(String path)
+	{
+		_layoutPath = path;
+		/*
+		if(($this->_layoutPath=realpath($path))===false || !is_dir($this->_layoutPath))
+			throw new CException(Yii::t('yii','The layout path "{path}" is not a valid directory.',
+				array('{path}'=>$path)));
+		*/
+	}
+	
+	/**
+	 * The pre-filter for controller actions.
+	 * This method is invoked before the currently requested controller action and all its filters
+	 * are executed. You may override this method with logic that needs to be done
+	 * before all controller actions.
+	 * @param controller the controller
+	 * @param action the action
+	 * @return whether the action should be executed.
+	 */
+	public boolean beforeControllerAction(Controller controller, Action action)
+	{
+		return true;
+	}
+	
+	/**
+	 * The post-filter for controller actions.
+	 * This method is invoked after the currently requested controller action and all its filters
+	 * are executed. You may override this method with logic that needs to be done
+	 * after all controller actions.
+	 * @param controller the controller
+	 * @param action the action
+	 */
+	public void afterControllerAction(Controller controller, Action action)
+	{
+	}
+	
+	/**
+	 * Initializes the application.
+	 * This method overrides the parent implementation by preloading the 'request' component.
+	 */
+	@Override
+	public void init()
+	{
+		super.init();
+		// preload 'request' so that it has chance to respond to onBeginRequest event.
+		getRequest();
+	}
+	
+	
+	/**
+	 * Returns the directory that stores runtime files.
+	 * @return the directory that stores runtime files. Defaults to 'protected/runtime'.
+	 */
+	public String getRuntimePath()
+	{
+		String rp = super.getRuntimePath();
+		if (rp == null)
+		{
+			rp = getServletConfig().getServletContext().getAttribute("javax.servlet.context.tmpdir")+"/runtime";
+			setRuntimePath(rp);
+		}
+		return rp;
+	}
+	
+
+	/**
+	 * @see #createUrl(String, Map, String)
+	 */
+	public String createUrl(String route)
+	{
+		return createUrl(route, null, "&");
+	}
+	
+	/**
+	 * @see #createUrl(String, Map, String)
+	 */
+	public String createUrl(String route, Map<String, String> params)
+	{
+		return createUrl(route, params, "&");
+	}
+	
+	/**
+	 * Creates a relative URL based on the given controller and action information.
+	 * @param route the URL route. This should be in the format of 'ControllerID/ActionID'.
+	 * @param params additional GET parameters (name=>value). Both the name and value will be URL-encoded.
+	 * @param ampersand the token separating name-value pairs in the URL.
+	 * @return the constructed URL
+	 */
+	public String createUrl(String route, Map<String, String> params, String ampersand)
+	{
+		return getUrlManager().createUrl(route,params,ampersand);
+	}
+
+	
+	/**
+	 * Creates an absolute URL based on the given controller and action information.
+	 * @param string $route the URL route. This should be in the format of 'ControllerID/ActionID'.
+	 * @param array $params additional GET parameters (name=>value). Both the name and value will be URL-encoded.
+	 * @param string $schema schema to use (e.g. http, https). If empty, the schema used for the current request will be used.
+	 * @param string $ampersand the token separating name-value pairs in the URL.
+	 * @return string the constructed URL
+	 */
+	public String createAbsoluteUrl(String route, Map<String, String> params, String schema, String ampersand)
+	{
+		String url=createUrl(route,params,ampersand);
+		if(url.startsWith("http"))
+			return url;
+		else
+			return getRequest().getHostInfo(schema)+url;
+	}
+	
+	/**
+	 * see #getBaseUrl(boolean)
+	 */
+	public String getBaseUrl()
+	{
+		return getBaseUrl(false);
+	}
+	
+	
+	/**
+	 * Returns the relative URL for the application.
+	 * This is a shortcut method to {@link HttpRequest#getBaseUrl()}.
+	 * @param boolean $absolute whether to return an absolute URL. Defaults to false, meaning returning a relative one.
+	 * @return string the relative URL for the application
+	 * @see HttpRequest#getBaseUrl()
+	 */
+	public String getBaseUrl(boolean absolute)
+	{
+		return getRequest().getBaseUrl(absolute);
+	}
+	
+	/**
+	 * @return the homepage URL
+	 */
+	public String getHomeUrl()
+	{
+		if(_homeUrl==null)
+		{
+			return getRequest().getBaseUrl()+"/";
+		}
+		else
+			return _homeUrl;
+	}
+	
+	/**
+	 * @param value the homepage URL
+	 */
+	public void setHomeUrl(String value)
+	{
+		_homeUrl=value;
+	}
+	
 	
 	@Override
 	public ServletConfig getServletConfig()

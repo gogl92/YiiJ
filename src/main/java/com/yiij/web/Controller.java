@@ -6,6 +6,7 @@ import com.yiij.base.HttpException;
 import com.yiij.base.Module;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.utils.StringHelper;
+import com.yiij.web.interfaces.IViewRenderer;
 import com.yiij.web.interfaces.IWebModule;
 import com.yiij.web.actions.Action;
 import com.yiij.web.actions.InlineAction;
@@ -335,13 +336,12 @@ public class Controller extends BaseController
 		if(moduleViewPath == null)
 			moduleViewPath = basePath;
 
-		/*
-		if(($renderer=Yii::app()->getViewRenderer())!==null)
-			$extension=$renderer->fileExtension;
+		IViewRenderer renderer;
+		String extension;
+		if((renderer=webApp().getViewRenderer())!=null)
+			extension=renderer.getFileExtension();
 		else
-			$extension='.php';
-		 */
-		String extension = ".html";
+			extension=".java";
 		
 		String viewFile;
 		if(viewName.startsWith("/"))

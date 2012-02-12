@@ -1,5 +1,6 @@
 package com.yiij.web;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -114,5 +115,10 @@ public class UrlManager extends WebApplicationComponent
 			_urlFormat = value;
 		else
 			throw new com.yiij.base.Exception("CUrlManager.UrlFormat must be either 'path' or 'get'.");
+	}
+	
+	public String createUrl(String route, Map<String, String> params, String ampersand)
+	{
+		return null;
 	}
 }

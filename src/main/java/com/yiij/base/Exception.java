@@ -12,4 +12,9 @@ public class Exception extends java.lang.RuntimeException
 	{
 		super(message);
 	}
+	
+	public Exception(Throwable t)
+	{
+		super(t);
+	}
 }
