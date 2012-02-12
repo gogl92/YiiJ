@@ -59,7 +59,10 @@ public class Module extends Component
 			ComponentConfig config = _moduleConfig.get(id);
 			if (!config.contains("enabled") ||  Integer.parseInt(config.get("enabled").toString()) != 0)
 			{
-				Module module = (Module)Component.newInstance(context(), config, getId()+'/'+id, _parentModule!=null?this:null);
+				Module module = (Module)Component.newInstance(context(), config,
+						new Object[] {getId()+'/'+id, _parentModule!=null?this:null},
+						new Class[] {String.class, Module.class}
+				);
 				_modules.put(id, module);
 				return module;
 			}
@@ -77,11 +80,21 @@ public class Module extends Component
 		}
 	}
 	
-	public Map<String, ComponentConfig> getModules()
+	public Map<String, ComponentConfig> getModulesConfig()
 	{
 		return _moduleConfig;
 	}
 	
+	public void setModules(ComponentConfig config)
+	{
+		for (String key : config.keySet())
+		{
+			if (_moduleConfig.containsKey(key))
+				_moduleConfig.get(key).merge((ComponentConfig)config.get(key));
+			else
+				_moduleConfig.put(key, (ComponentConfig)config.get(key));
+		}
+	}	
 	public boolean hasComponent(String id)
 	{
 		return _components.containsKey(id) || _componentConfig.containsKey(id);

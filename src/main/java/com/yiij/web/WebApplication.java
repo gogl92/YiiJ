@@ -142,7 +142,7 @@ public class WebApplication extends Application implements IWebApplication, IWeb
 		{
 			UrlManager manager = getUrlManager();
 			manager.parsePathInfo(pathInfo.substring(pos+1));
-			String actionID = pathInfo.substring(0, pos+1);
+			String actionID = pathInfo.substring(0, pos);
 			return manager.caseSensitive ? actionID : actionID.toLowerCase();
 		}
 		else
