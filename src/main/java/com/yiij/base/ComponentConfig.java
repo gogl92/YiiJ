@@ -1,14 +1,17 @@
 package com.yiij.base;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 @SuppressWarnings("serial")
 public class ComponentConfig extends Hashtable<String, Object>
@@ -42,12 +45,22 @@ public class ComponentConfig extends Hashtable<String, Object>
 		}
 	}
 	
-	public void parseConfigXml(InputStream is) throws java.lang.Exception
+	public void parseConfigXml(InputStream is) throws IOException
 	{
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		DocumentBuilder db = dbf.newDocumentBuilder();
-		
-		Document doc = db.parse(is);
+		DocumentBuilder db;
+		Document doc;
+		try
+		{
+			db = dbf.newDocumentBuilder();
+			doc = db.parse(is);
+		} catch (ParserConfigurationException e)
+		{
+			throw new IOException(e);
+		} catch (SAXException e)
+		{
+			throw new IOException(e);
+		}
 		
 		if (!doc.getDocumentElement().getTagName().equals("yiij"))
 			throw new Exception("Invalid configuration file");
