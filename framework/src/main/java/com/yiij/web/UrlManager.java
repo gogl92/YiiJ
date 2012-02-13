@@ -4,6 +4,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yiij.base.interfaces.IContext;
 
 public class UrlManager extends WebApplicationComponent
@@ -59,7 +61,7 @@ public class UrlManager extends WebApplicationComponent
 		}
 		else if (request.getParam(routeVar, null) != null)
 		{
-			return request.getParam(routeVar);
+			return StringUtils.strip(request.getParam(routeVar), "\\/");
 		}
 		else
 			return "";
