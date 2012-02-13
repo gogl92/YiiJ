@@ -51,14 +51,16 @@ public class TestServlet extends HttpServlet
 		_yiijConfig.parseConfigXml(is);
 	}
 	
-	public Response simulateGet(String url, Map<String, String> parameters) throws ServletException, IOException
+	public Response simulateGet(String uri, Map<String, String> parameters) throws ServletException, IOException
 	{
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
 		WebApplication app;
 
-		request.setRequestURI(url);
+		request.setMethod("GET");
+		request.setRequestURI(uri);
+		request.setPathInfo(uri);
 		for (String param : parameters.keySet())
 			request.setupAddParameter(param, parameters.get(param));
 		

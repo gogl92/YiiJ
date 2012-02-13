@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yiij.base.HttpException;
 import com.yiij.base.interfaces.IContext;
 
 public class UrlManager extends WebApplicationComponent
@@ -13,17 +14,21 @@ public class UrlManager extends WebApplicationComponent
 	public static final String GET_FORMAT="get";
 	public static final String PATH_FORMAT="path";
 	
-	public String routeVar = "r";
-	public boolean caseSensitive = true; 
-	
+	private String _routeVar = "r";
+	private boolean _caseSensitive = true; 
 	private String _urlFormat = UrlManager.GET_FORMAT;
 	private String _baseUrl;
+	private String _urlSuffix = "";
+	private boolean _useStrictParsing = false;
 	
 	public UrlManager(IContext context)
 	{
 		super(context);
 	}
 	
+	/**
+	 * Initializes the application component.
+	 */
 	@Override
 	public void init()
 	{
@@ -32,20 +37,107 @@ public class UrlManager extends WebApplicationComponent
 	}
 
 	/**
-	 * Returns the base URL of the application.
-	 * @return String the base URL of the application (the part after host name and before query string).
-	 * If {@link showScriptName} is true, it will include the script name part.
-	 * Otherwise, it will not, and the ending slashes are stripped off.
+	 * The URL suffix used when in 'path' format.
+	 * For example, ".html" can be used so that the URL looks like pointing to a static HTML page. Defaults to empty.
+	 * @return 
 	 */
-	public String getBaseUrl()
+	public String getUrlSuffix()
 	{
-		if(_baseUrl!=null)
-			return _baseUrl;
-		else
-		{
-			_baseUrl = webApp().getRequest().getBaseUrl();
-			return _baseUrl;
-		}		
+		return _urlSuffix;
+	}
+	
+	/**
+	 * @see #getUrlSuffix()
+	 */
+	public void setUrlSuffix(String value)
+	{
+		_urlSuffix = value;
+	}
+	
+	/**
+	 * The GET variable name for route. Defaults to 'r'.
+	 * @return
+	 */
+	public String getRouteVar()
+	{
+		return _routeVar;
+	}
+	
+	/**
+	 * @see #getRouteVar()
+	 */
+	public void setRouteVar(String value)
+	{
+		_routeVar = value;
+	}
+	
+	/**
+	 * Whether routes are case-sensitive. Defaults to true. By setting this to false,
+	 * the route in the incoming request will be turned to lower case first before further processing.
+	 * As a result, you should follow the convention that you use lower case when specifying
+	 * controller mapping ({@link WebApplication#controllerMap}) and action mapping
+	 * ({@link Controller#actions}). Also, the directory names for organizing controllers should
+	 * be in lower case.
+	 * @return
+	 */
+	public boolean getCaseSensitive()
+	{
+		return _caseSensitive;
+	}
+	
+	/**
+	 * @see #getCaseSensitive()
+	 */
+	public void setCaseSensitive(boolean value)
+	{
+		_caseSensitive = value;
+	}
+	
+	/**
+	 * Whether to enable strict URL parsing.
+	 * This property is only effective when {@link #getUrlFormat()} is 'path'.
+	 * If it is set true, then an incoming URL must match one of the {@link #rules URL rules}.
+	 * Otherwise, it will be treated as an invalid request and trigger a 404 HTTP exception.
+	 * Defaults to false.
+	 * @return
+	 */
+	public boolean getUseStrictParsing()
+	{
+		return _useStrictParsing;
+	}
+	
+	/**
+	 * @see #getUseStrictParsing()
+	 */
+	public void setUseStrictParsing(boolean value)
+	{
+		_useStrictParsing = value;
+	}
+
+	/**
+	 * Constructs a URL.
+	 * @param route the controller and the action (e.g. article/read)
+	 * @param params list of GET parameters (name=>value). Both the name and value will be URL-encoded.
+	 * If the name is '#', the corresponding value will be treated as an anchor
+	 * and will be appended at the end of the URL.
+	 * @param ampersand the token separating name-value pairs in the URL. Defaults to '&'.
+	 * @return the constructed URL
+	 */
+	public String createUrl(String route, Map<String, String> params, String ampersand)
+	{
+		return null;
+	}
+	
+	/**
+	 * Creates a URL based on default settings.
+	 * @param route the controller and the action (e.g. article/read)
+	 * @param params list of GET parameters
+	 * @param ampersand the token separating name-value pairs in the URL.
+	 * @return the constructed URL
+	 */
+	public String createUrlDefault(String route, Map<String, String> params, String ampersand)
+	{
+		return null;
 	}
 	
 	/**
@@ -55,18 +147,36 @@ public class UrlManager extends WebApplicationComponent
 	 */
 	public String parseUrl(HttpRequest request)
 	{
-		if (getUrlFormat() == UrlManager.PATH_FORMAT)
+		if (getUrlFormat().equals(UrlManager.PATH_FORMAT))
 		{
-			return "";
+			String rawPathInfo = request.getPathInfo();
+			String pathInfo = removeUrlSuffix(rawPathInfo,_urlSuffix);
+			/*
+			foreach($this->_rules as $i=>$rule)
+			{
+				if(is_array($rule))
+					$this->_rules[$i]=$rule=Yii::createComponent($rule);
+				if(($r=$rule->parseUrl($this,$request,$pathInfo,$rawPathInfo))!==false)
+					return isset($_GET[$this->routeVar]) ? $_GET[$this->routeVar] : $r;
+			}
+			*/
+			if(_useStrictParsing)
+				throw new HttpException(404, "Unable to resolve the request '"+pathInfo+"'.");
+			else
+				return StringUtils.strip(pathInfo, "\\/");
 		}
-		else if (request.getParam(routeVar, null) != null)
+		else if (request.getParam(_routeVar, null) != null)
 		{
-			return StringUtils.strip(request.getParam(routeVar), "\\/");
+			return StringUtils.strip(request.getParam(_routeVar), "\\/");
 		}
 		else
 			return "";
 	}	
 	
+	/**
+	 * Parses a path info into URL segments and saves them to {@link HttpRequest#getParam(String)}.
+	 * @param pathInfo path info
+	 */
 	public void parsePathInfo(String pathInfo)
 	{
         Pattern pattern = Pattern.compile("\\[(.*?)\\]");
@@ -106,11 +216,60 @@ public class UrlManager extends WebApplicationComponent
 		}		
 	}
 	
+	/**
+	 * Removes the URL suffix from path info.
+	 * @param string $pathInfo path info part in the URL
+	 * @param string $urlSuffix the URL suffix to be removed
+	 * @return string path info with URL suffix removed.
+	 */
+	public String removeUrlSuffix(String pathInfo, String urlSuffix)
+	{
+		if(urlSuffix!="" && pathInfo.substring(pathInfo.length()-urlSuffix.length()).equals(urlSuffix))
+			return pathInfo.substring(0, pathInfo.length()-urlSuffix.length());
+		else
+			return pathInfo;
+	}
+	
+	/**
+	 * Returns the base URL of the application.
+	 * @return the base URL of the application (the part after host name and before query string).
+	 */
+	public String getBaseUrl()
+	{
+		if(_baseUrl!=null)
+			return _baseUrl;
+		else
+		{
+			_baseUrl = webApp().getRequest().getBaseUrl();
+			return _baseUrl;
+		}		
+	}
+	
+	/**
+	 * Sets the base URL of the application (the part after host name and before query string).
+	 * This method is provided in case the {@link #getBaseUrl()} cannot be determined automatically.
+	 * The ending slashes should be stripped off. 
+	 * @param value the base URL of the application
+	 */
+	public void setBaseUrl(String value)
+	{
+		_baseUrl = value;
+	}	
+	
+	/**
+	 * Returns the URL format.
+	 * @return the URL format. Defaults to 'path'. Valid values include 'path' and 'get'.
+	 * Please refer to the guide for more details about the difference between these two formats.
+	 */
 	public String getUrlFormat()
 	{
 		return _urlFormat;
 	}
 	
+	/**
+	 * Sets the URL format.
+	 * @param value the URL format. It must be either 'path' or 'get'.
+	 */
 	public void setUrlFormat(String value)
 	{
 		if(value.equals(UrlManager.PATH_FORMAT) || value.equals(UrlManager.GET_FORMAT))
@@ -119,8 +278,4 @@ public class UrlManager extends WebApplicationComponent
 			throw new com.yiij.base.Exception("CUrlManager.UrlFormat must be either 'path' or 'get'.");
 	}
 	
-	public String createUrl(String route, Map<String, String> params, String ampersand)
-	{
-		return null;
-	}
 }

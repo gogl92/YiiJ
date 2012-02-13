@@ -279,7 +279,7 @@ public class WebApplication extends Application implements IWebApplication,
 		{
 			route = ((IWebModule) owner).getDefaultController();
 		}
-		boolean caseSensitive = getUrlManager().caseSensitive;
+		boolean caseSensitive = getUrlManager().getCaseSensitive();
 		String basePath = null;
 		String controllerID = null;
 
@@ -347,7 +347,7 @@ public class WebApplication extends Application implements IWebApplication,
 			UrlManager manager = getUrlManager();
 			manager.parsePathInfo(pathInfo.substring(pos + 1));
 			String actionID = pathInfo.substring(0, pos);
-			return manager.caseSensitive ? actionID : actionID.toLowerCase();
+			return manager.getCaseSensitive() ? actionID : actionID.toLowerCase();
 		} else
 			return pathInfo;
 	}
