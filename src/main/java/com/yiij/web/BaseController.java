@@ -66,9 +66,9 @@ public abstract class BaseController extends WebComponent
 	 * @return the rendering result. Null if the rendering result is not required.
 	 * @throws Exception if the view file does not exist
 	 */
-	public String renderFile(String view, String viewFile, Object data, boolean doReturn) throws IOException
+	public String renderFile(String viewFile, Object data, boolean doReturn) throws IOException
 	{
-		return renderWithRenderer(webApp().getViewRenderer(this, view), viewFile, data, doReturn);
+		return renderWithRenderer(webApp().getViewRenderer(this, null), viewFile, data, doReturn);
 	}
 	
 }

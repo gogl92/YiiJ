@@ -2,18 +2,29 @@ package com.yiij.web.renderers;
 
 import java.io.IOException;
 
+import com.yiij.base.interfaces.IContext;
 import com.yiij.web.BaseController;
+import com.yiij.web.WebApplicationComponent;
+import com.yiij.web.interfaces.IPluginViewRenderer;
 import com.yiij.web.interfaces.IViewRenderer;
 
-public class ClassRenderer implements IViewRenderer
+public class ClassRenderer extends WebApplicationComponent implements IPluginViewRenderer
 {
 	private String _viewClass;
 	
+	public ClassRenderer(IContext context)
+	{
+		super(context);
+	}
+
+	
+	/*
 	public ClassRenderer(String viewClass)
 	{
 		super();
 		_viewClass = viewClass;
 	}
+	*/
 
 	@Override
 	public String getFileExtension()
@@ -25,6 +36,9 @@ public class ClassRenderer implements IViewRenderer
 	public String renderFile(BaseController controller, String file,
 			Object data, boolean doReturn) throws IOException
 	{
+		return "";
+		
+		/*
 		try
 		{
 			Class<?> c = Class.forName(_viewClass);
@@ -39,5 +53,6 @@ public class ClassRenderer implements IViewRenderer
 		{
 			throw new com.yiij.base.Exception(e);
 		}
+		*/
 	}
 }

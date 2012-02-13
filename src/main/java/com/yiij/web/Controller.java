@@ -466,8 +466,8 @@ public class Controller extends BaseController
 			moduleViewPath = basePath;
 
 		IViewRenderer renderer = webApp().getViewRenderer(this, viewName);
-		if (renderer.getFileExtension() == null)
-			return "";
+		//if (renderer.getFileExtension() == null)
+			//return "";
 		String extension = renderer.getFileExtension();
 		
 		String viewFile;
@@ -479,12 +479,13 @@ public class Controller extends BaseController
 				viewFile=moduleViewPath+viewName;
 		}
 		else if(viewName.indexOf(".")!=-1)
-			//$viewFile=Yii::getPathOfAlias($viewName);
-			viewFile = viewName;
+			viewFile = webApp().getPathOfAlias(viewName);
 		else
 			viewFile=viewPath+"/"+viewName;
 
-		if (Object.class.getResource(viewFile+extension)!=null)
+		if (extension == null)
+			return viewFile;
+		else if (Object.class.getResource(viewFile+extension)!=null)
 			return viewFile+extension; //Yii::app()->findLocalizedFile($viewFile.$extension);
 		//else if($extension!=='.php' && is_file($viewFile.'.php'))
 			//return Yii::app()->findLocalizedFile($viewFile.'.php');
@@ -532,7 +533,7 @@ public class Controller extends BaseController
 			{
 				Hashtable<String, String> lparams = new Hashtable<String, String>();
 				lparams.put("content", output);
-				output=renderFile(resolveLayoutNameOnly(getLayout()),layoutFile,lparams, true);
+				output=renderFile(layoutFile,lparams, true);
 			}
 
 			afterRender(view,output);
@@ -646,7 +647,8 @@ public class Controller extends BaseController
 		String viewFile;
 		if((viewFile=getViewFile(view))!=null)
 		{
-			String output = webApp().getViewRenderer(this, view).renderFile(this, viewFile, data, doReturn);
+			//String output = webApp().getViewRenderer(this, view).renderFile(this, viewFile, data, doReturn);
+			String output = renderFile(viewFile,data,doReturn);
 			if(processOutput)
 				output = processOutput(output);
 			if(doReturn)

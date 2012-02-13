@@ -1,12 +1,14 @@
 package com.yiij.web;
 
+import com.yiij.base.Exception;
 import com.yiij.base.Module;
 import com.yiij.base.interfaces.IContext;
+import com.yiij.web.interfaces.IWebComponent;
 import com.yiij.web.interfaces.IWebModule;
 
-public class WebModule extends Module implements IWebModule
+public class WebModule extends Module implements IWebModule, IWebComponent
 {
-	private String _defaultController = "default";
+	private String _defaultController = "main";
 	private String _layout;
 	private String _viewPath;
 	private String _layoutPath;
@@ -15,10 +17,12 @@ public class WebModule extends Module implements IWebModule
 	public WebModule(IContext context, String id, Module parent)
 	{
 		super(context, id, parent);
+		if (!(context().getApplication() instanceof WebApplication))
+			throw new Exception("WebComponent only works with WebApplication");
 	}
-
+	
 	/**
-	 * The ID of the default controller for this module. Defaults to 'default'.
+	 * The ID of the default controller for this module. Defaults to 'main'.
 	 * @return String 
 	 */
 	@Override
@@ -38,7 +42,7 @@ public class WebModule extends Module implements IWebModule
 	
 	/**
 	 * The layout that is shared by the controllers inside this module.
-	 * If a controller has explicitly declared its own {@link Controller.layout layout},
+	 * If a controller has explicitly declared its own {@link Controller#getLayout() layout},
 	 * this property will be ignored.
 	 * If this is null (default), the application's layout or the parent module's layout (if available)
 	 * will be used. If this is blank, then no layout will be used.
@@ -67,7 +71,7 @@ public class WebModule extends Module implements IWebModule
 		if(_viewPath!=null)
 			return _viewPath;
 		else
-			return _viewPath=getBasePath()+System.getProperty("file.separator")+"views";
+			return _viewPath=getBasePath()+"/views";
 	}
 
 	/**
@@ -122,5 +126,10 @@ public class WebModule extends Module implements IWebModule
 	public void setViewPackageName(String value)
 	{
 		_viewPackageName = value;
+	}
+	
+	public WebApplication webApp()
+	{
+		return (WebApplication)context().getApplication();
 	}
 }

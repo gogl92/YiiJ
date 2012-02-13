@@ -1,9 +1,13 @@
 package com.yiij.base;
 
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.zip.CRC32;
 
 import javax.servlet.ServletException;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.yiij.base.interfaces.IContext;
 
@@ -16,6 +20,7 @@ public abstract class Application extends Module
 	private String _language;
 	private String _sourceLanguage = "en_us";
 	private String _charset = "UTF-8";
+	private Map<String, String> _aliases = new Hashtable<String, String>();
 	
 	public Application(IContext context)
 	{
@@ -250,4 +255,31 @@ public abstract class Application extends Module
 	protected void registerCoreComponents()
 	{
 	}
+	
+	public String getPathOfAlias(String alias)
+	{
+		int pos;
+		if (_aliases.containsKey(alias))
+			return _aliases.get(alias);
+		else if ((pos=alias.indexOf("."))!=-1)
+		{
+			String rootAlias = alias.substring(0, pos);
+			if (_aliases.containsKey(rootAlias))
+			{
+				String apath = StringUtils.stripEnd(_aliases.get(rootAlias)+"/"+alias.substring(pos+1).replaceAll("\\.", "/"), "*/");
+				_aliases.put(alias, apath);
+				return apath;
+			}
+		}
+		return null;
+	}
+
+	public void setPathOfAlias(String alias, String value)
+	{
+		if (value == null)
+			_aliases.remove(alias);
+		else
+			_aliases.put(alias, StringUtils.stripEnd(value, "\\/"));
+	}
+	
 }

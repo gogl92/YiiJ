@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.yiij.base.interfaces.IApplicationComponent;
 import com.yiij.base.interfaces.IContext;
+import com.yiij.web.interfaces.IWebComponent;
 
 public class Module extends Component
 {
@@ -43,12 +44,14 @@ public class Module extends Component
 		if(_basePath==null)
 		{
 			if (_parentModule == null)
-				_basePath = "";
+			{
+				if (context().getApplication() == this)
+					_basePath = "";
+				else
+					_basePath = context().getApplication().getBasePath()+"/"+_id;
+			}
 			else
 				_basePath = _parentModule.getBasePath()+"/"+_id;
-			
-			//$class=new ReflectionClass(get_class($this));
-			//$this->_basePath=dirname($class->getFileName());
 		}
 		return _basePath;
 	}
@@ -103,7 +106,9 @@ public class Module extends Component
 			if (!config.contains("enabled") ||  Integer.parseInt(config.get("enabled").toString()) != 0)
 			{
 				Module module = (Module)Component.newInstance(context(), config,
-						new Object[] {getId()+'/'+id, _parentModule!=null?this:null},
+						(context().getApplication() == this) ?
+								(new Object[] {id, null}) :
+								(new Object[] {getId()+'/'+id, this}),
 						new Class[] {String.class, Module.class}
 				);
 				_modules.put(id, module);
