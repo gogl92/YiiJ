@@ -2,6 +2,8 @@ package com.yiij.mock;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -49,6 +51,24 @@ public class TestServlet extends HttpServlet
 	public void loadYiiJConfig(InputStream is) throws IOException
 	{
 		_yiijConfig.parseConfigXml(is);
+	}
+
+	public Response simulateGet(String url) throws ServletException, IOException
+	{
+		URL surl = new URL(url);
+		
+		Map<String, String> params = new HashMap<String, String>();
+		if (surl.getQuery()!=null)
+		{
+		    String[] parseparams = surl.getQuery().split("&");
+		    for (String param : parseparams)
+		    {
+		        String name = param.split("=")[0];
+		        String value = param.split("=")[1];
+		        params.put(name, value);
+		    }
+		}
+		return simulateGet(surl.getPath(), params);
 	}
 	
 	public Response simulateGet(String uri, Map<String, String> parameters) throws ServletException, IOException
