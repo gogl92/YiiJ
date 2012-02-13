@@ -272,7 +272,10 @@ public class Controller extends BaseController
 		if((module = (IWebModule)getModule())==null)
 			module = webApp();
 		IViewRenderer renderer = webApp().getViewRenderer();
-		return module.getViewPath()+(renderer.getFileExtension()!=null?"/":".")+getId();
+		if (renderer.getFileExtension()!=null)
+			return module.getViewPath()+"/"+getId();
+		else
+			return module.getViewPath()+"."+StringHelper.upperCaseFirst(getId());
 	}
 	
 	/**
@@ -386,17 +389,6 @@ public class Controller extends BaseController
 		return resolveViewFile(layoutName,module.getLayoutPath(),webApp().getViewPath(),module.getViewPath());
 	}
 	
-	/*
-	private String resolveLayoutNameOnly(String layoutName)
-	{
-		Object[] ret = resolveLayoutName(layoutName);
-		if (ret == null)
-			return null;
-		return (String)ret[0];
-	}
-	*/
-	
-	
 	/**
 	 * Finds a view file based on its name.
 	 * The view name can be in one of the following formats:
@@ -461,7 +453,7 @@ public class Controller extends BaseController
 				IWebModule baseModule = getModule();
 				if (baseModule == null)
 					baseModule = webApp();
-				viewFile=baseModule.getPackageName()+viewPath+"."+StringHelper.upperCaseFirst(viewName)+"View";
+				viewFile=baseModule.getPackageName()+viewPath+""+StringHelper.upperCaseFirst(viewName)+"View";
 			}
 		}
 

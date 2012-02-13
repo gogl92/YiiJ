@@ -454,7 +454,10 @@ public class WebApplication extends Application implements IWebApplication,
 		else
 		{
 			IViewRenderer renderer = webApp().getViewRenderer();
-			return _layoutPath = getViewPath() + (renderer.getFileExtension()!=null?"/":".") + "layouts";
+			if (renderer.getFileExtension()!=null)
+				return _layoutPath = getViewPath() + "/layouts";
+			else
+				return _layoutPath = getViewPath() + ".Layouts";
 		}
 	}
 

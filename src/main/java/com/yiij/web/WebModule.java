@@ -9,11 +9,10 @@ import com.yiij.web.interfaces.IWebModule;
 
 public class WebModule extends Module implements IWebModule, IWebComponent
 {
-	private String _defaultController = "main";
+	private String _defaultController = "default";
 	private String _layout;
 	private String _viewPath;
 	private String _layoutPath;
-	private String _viewPackageName;
 
 	public WebModule(IContext context, String id, Module parent)
 	{
@@ -23,7 +22,7 @@ public class WebModule extends Module implements IWebModule, IWebComponent
 	}
 	
 	/**
-	 * The ID of the default controller for this module. Defaults to 'main'.
+	 * The ID of the default controller for this module. Defaults to 'default'.
 	 * @return String 
 	 */
 	@Override
@@ -107,7 +106,10 @@ public class WebModule extends Module implements IWebModule, IWebComponent
 		else
 		{
 			IViewRenderer renderer = webApp().getViewRenderer();
-			return _layoutPath = getViewPath() + (renderer.getFileExtension()!=null?"/":".") + "layouts";
+			if (renderer.getFileExtension()!=null)
+				return _layoutPath = getViewPath() + "/layouts";
+			else
+				return _layoutPath = getViewPath() + ".Layouts";
 		}
 	}
 
@@ -124,20 +126,6 @@ public class WebModule extends Module implements IWebModule, IWebComponent
 				array('{path}'=>$path)));
 		*/
 	}
-	
-	/*
-	public String getViewPackageName()
-	{
-		if (_viewPackageName == null)
-			_viewPackageName = getPackageName()+".views";
-		return _viewPackageName;
-	}
-	
-	public void setViewPackageName(String value)
-	{
-		_viewPackageName = value;
-	}
-	*/
 	
 	public WebApplication webApp()
 	{
