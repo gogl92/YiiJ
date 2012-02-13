@@ -23,7 +23,7 @@ public abstract class BaseController extends WebComponent
 	 */
 	abstract public String getViewFile(String viewName);
 	
-	abstract public String getViewPackageName();
+	//abstract public String getViewPackageName();
 	
 	/**
 	 * @see #renderWithRenderer(String, Object, boolean)
@@ -68,7 +68,7 @@ public abstract class BaseController extends WebComponent
 	 */
 	public String renderFile(String viewFile, Object data, boolean doReturn) throws IOException
 	{
-		return renderWithRenderer(webApp().getViewRenderer(this, null), viewFile, data, doReturn);
+		return renderWithRenderer(webApp().getViewRenderer(), viewFile, data, doReturn);
 	}
 	
 }

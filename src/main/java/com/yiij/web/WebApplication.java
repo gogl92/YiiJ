@@ -206,32 +206,6 @@ public class WebApplication extends Application implements IWebApplication,
 	}
 
 	/**
-	 * Returns the view render suited for the controller and view. If no plugin
-	 * renderer is defined, returns a special class-based ClassRenderer.
-	 * 
-	 * @param controller
-	 * @param viewName
-	 * @return the view renderer.
-	 */
-	public IViewRenderer getViewRenderer(BaseController controller,
-			String viewName)
-	{
-		return getViewRenderer();
-		/*
-		 * IViewRenderer renderer = getViewRenderer(); if (renderer == null) {
-		 * String viewPackage = controller.getViewPackageName(); String
-		 * viewClassFile = viewPackage + "." +
-		 * StringHelper.upperCaseFirst(viewName)+"View";
-		 * 
-		 * try { Class<?> c = Class.forName(viewClassFile); if
-		 * (IViewRenderer.class.isAssignableFrom(c)) renderer = new
-		 * ClassRenderer(viewClassFile); //(IViewRenderer)c.newInstance(); }
-		 * catch (ClassNotFoundException e) { throw new
-		 * com.yiij.base.Exception(e); } } return renderer;
-		 */
-	}
-
-	/**
 	 * Creates the controller and performs the specified action.
 	 * 
 	 * @param route
@@ -421,6 +395,7 @@ public class WebApplication extends Application implements IWebApplication,
 		_controllerPath = value;
 	}
 
+	/*
 	public String getViewPackageName()
 	{
 		if (_viewPackageName == null)
@@ -432,6 +407,7 @@ public class WebApplication extends Application implements IWebApplication,
 	{
 		_viewPackageName = value;
 	}
+	*/
 
 	/**
 	 * @return the root directory of view files. Defaults to 'protected/views'.
@@ -441,7 +417,13 @@ public class WebApplication extends Application implements IWebApplication,
 		if (_viewPath != null)
 			return _viewPath;
 		else
-			return _viewPath = getBasePath() + "/views";
+		{
+			IViewRenderer renderer = webApp().getViewRenderer();
+			if (renderer.getFileExtension()!=null)
+				return _viewPath=getBasePath()+"/views";
+			else
+				return _viewPath=".views";
+		}
 	}
 
 	/**
@@ -470,7 +452,10 @@ public class WebApplication extends Application implements IWebApplication,
 		if (_layoutPath != null)
 			return _layoutPath;
 		else
-			return _layoutPath = getViewPath() + "/layouts";
+		{
+			IViewRenderer renderer = webApp().getViewRenderer();
+			return _layoutPath = getViewPath() + (renderer.getFileExtension()!=null?"/":".") + "layouts";
+		}
 	}
 
 	/**

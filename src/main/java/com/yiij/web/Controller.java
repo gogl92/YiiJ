@@ -1,7 +1,7 @@
 package com.yiij.web;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -248,6 +248,7 @@ public class Controller extends BaseController
 		return _module;
 	}
 
+	/*
 	public String getViewPackageName()
 	{
 		IWebModule module = getModule();
@@ -255,6 +256,7 @@ public class Controller extends BaseController
 			module = webApp();
 		return module.getViewPackageName()+"."+getId();
 	}
+	*/
 	
 	/**
 	 * Returns the directory containing view files for this controller.
@@ -269,7 +271,8 @@ public class Controller extends BaseController
 		IWebModule module;
 		if((module = (IWebModule)getModule())==null)
 			module = webApp();
-		return module.getViewPath()+"/"+getId();
+		IViewRenderer renderer = webApp().getViewRenderer();
+		return module.getViewPath()+(renderer.getFileExtension()!=null?"/":".")+getId();
 	}
 	
 	/**
@@ -356,7 +359,6 @@ public class Controller extends BaseController
 	 */
 	public String getLayoutFile(String layoutName)
 	{
-		/*
 		if(layoutName != null && layoutName.equals(""))
 			return null;
 		//if((($theme=Yii::app()->getTheme())!==null || ($theme=Yii::app()->themeManager->getTheme($this->getModule()!==null?$this->getModule()->theme:null))!==null) && ($layoutFile=$theme->getLayoutFile($this,$layoutName))!==false)
@@ -380,48 +382,11 @@ public class Controller extends BaseController
 		}
 		else if((module=this.getModule())==null)
 			module=webApp();
-		*/
 		
-		Object[] findLayout = resolveLayoutName(layoutName);
-		if (findLayout == null)
-			return null;
-		return resolveViewFile((String)findLayout[0],((IWebModule)findLayout[1]).getLayoutPath(),webApp().getViewPath(),((IWebModule)findLayout[1]).getViewPath());
-	}
-
-	/**
-	 * 
-	 * @param layoutName
-	 * @return 0=layoutName, 1=module
-	 */
-	private Object[] resolveLayoutName(String layoutName)
-	{
-		if(layoutName != null && layoutName.equals(""))
-			return null;
-		//if((($theme=Yii::app()->getTheme())!==null || ($theme=Yii::app()->themeManager->getTheme($this->getModule()!==null?$this->getModule()->theme:null))!==null) && ($layoutFile=$theme->getLayoutFile($this,$layoutName))!==false)
-			//return $layoutFile;
-
-		IWebModule module;
-		if(layoutName == null)
-		{
-			module = getModule();
-			while(module!=null)
-			{
-				if(module.getLayout()!=null && module.getLayout().equals(""))
-					return null;
-				if(module.getLayout()!=null)
-					break;
-				module=(IWebModule)module.getParentModule();
-			}
-			if(module==null)
-				module=webApp();
-			layoutName=module.getLayout();
-		}
-		else if((module=this.getModule())==null)
-			module=webApp();
-
-		return new Object[] { layoutName, module };
+		return resolveViewFile(layoutName,module.getLayoutPath(),webApp().getViewPath(),module.getViewPath());
 	}
 	
+	/*
 	private String resolveLayoutNameOnly(String layoutName)
 	{
 		Object[] ret = resolveLayoutName(layoutName);
@@ -429,6 +394,7 @@ public class Controller extends BaseController
 			return null;
 		return (String)ret[0];
 	}
+	*/
 	
 	
 	/**
@@ -465,25 +431,41 @@ public class Controller extends BaseController
 		if(moduleViewPath == null)
 			moduleViewPath = basePath;
 
-		IViewRenderer renderer = webApp().getViewRenderer(this, viewName);
-		//if (renderer.getFileExtension() == null)
-			//return "";
+		IViewRenderer renderer = webApp().getViewRenderer();
+		boolean isClassBased = renderer.getFileExtension() == null;
 		String extension = renderer.getFileExtension();
 		
 		String viewFile;
 		if(viewName.startsWith("/"))
 		{
+			if (isClassBased)
+				throw new com.yiij.base.Exception("Slash layout operation not supported for class-based layout");
 			if (viewName.startsWith("//"))
 				viewFile=basePath+viewName;
 			else
 				viewFile=moduleViewPath+viewName;
 		}
 		else if(viewName.indexOf(".")!=-1)
-			viewFile = webApp().getPathOfAlias(viewName);
+		{
+			if (!isClassBased)
+				viewFile = webApp().getPathOfAlias(viewName);
+			else
+				viewFile = viewName; // if contains dot, is a full class name (ex.: "com.test.layouts.MainLayout")
+		}
 		else
-			viewFile=viewPath+"/"+viewName;
+		{
+			if (!isClassBased)
+				viewFile=viewPath+"/"+viewName;
+			else
+			{
+				IWebModule baseModule = getModule();
+				if (baseModule == null)
+					baseModule = webApp();
+				viewFile=baseModule.getPackageName()+viewPath+"."+StringHelper.upperCaseFirst(viewName)+"View";
+			}
+		}
 
-		if (extension == null)
+		if (isClassBased)
 			return viewFile;
 		else if (Object.class.getResource(viewFile+extension)!=null)
 			return viewFile+extension; //Yii::app()->findLocalizedFile($viewFile.$extension);
@@ -531,7 +513,7 @@ public class Controller extends BaseController
 			String layoutFile;
 			if((layoutFile=getLayoutFile(getLayout()))!=null) 
 			{
-				Hashtable<String, String> lparams = new Hashtable<String, String>();
+				HashMap<String, String> lparams = new HashMap<String, String>();
 				lparams.put("content", output);
 				output=renderFile(layoutFile,lparams, true);
 			}
@@ -591,9 +573,14 @@ public class Controller extends BaseController
 	 */
 	public String renderText(String text, boolean doReturn) throws IOException
 	{
-		//if(($layoutFile=$this->getLayoutFile($this->layout))!==false)
-			//$text=$this->renderFile($layoutFile,array('content'=>$text),true);
-
+		String layoutFile;
+		if((layoutFile=getLayoutFile(getLayout()))!=null) 
+		{
+			HashMap<String, String> lparams = new HashMap<String, String>();
+			lparams.put("content", text);
+			text=renderFile(layoutFile,lparams, true);
+		}
+		
 		text = processOutput(text);
 
 		if(doReturn)
@@ -647,7 +634,6 @@ public class Controller extends BaseController
 		String viewFile;
 		if((viewFile=getViewFile(view))!=null)
 		{
-			//String output = webApp().getViewRenderer(this, view).renderFile(this, viewFile, data, doReturn);
 			String output = renderFile(viewFile,data,doReturn);
 			if(processOutput)
 				output = processOutput(output);

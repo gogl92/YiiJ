@@ -14,7 +14,7 @@ public class interfaces
 		//public String getControllerPath();
 		public String getViewPath();
 		public String getPackageName();
-		public String getViewPackageName();
+		//public String getViewPackageName();
 		public String getLayout();
 		public Module getParentModule();
 		public String getLayoutPath();

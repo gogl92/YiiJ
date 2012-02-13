@@ -10,22 +10,11 @@ import com.yiij.web.interfaces.IViewRenderer;
 
 public class ClassRenderer extends WebApplicationComponent implements IPluginViewRenderer
 {
-	private String _viewClass;
-	
 	public ClassRenderer(IContext context)
 	{
 		super(context);
 	}
-
 	
-	/*
-	public ClassRenderer(String viewClass)
-	{
-		super();
-		_viewClass = viewClass;
-	}
-	*/
-
 	@Override
 	public String getFileExtension()
 	{
@@ -36,12 +25,9 @@ public class ClassRenderer extends WebApplicationComponent implements IPluginVie
 	public String renderFile(BaseController controller, String file,
 			Object data, boolean doReturn) throws IOException
 	{
-		return "";
-		
-		/*
 		try
 		{
-			Class<?> c = Class.forName(_viewClass);
+			Class<?> c = Class.forName(file);
 			return ((IViewRenderer)c.newInstance()).renderFile(controller, file, data, doReturn);
 		} catch (ClassNotFoundException e)
 		{
@@ -53,6 +39,5 @@ public class ClassRenderer extends WebApplicationComponent implements IPluginVie
 		{
 			throw new com.yiij.base.Exception(e);
 		}
-		*/
 	}
 }

@@ -3,6 +3,7 @@ package com.yiij.web;
 import com.yiij.base.Exception;
 import com.yiij.base.Module;
 import com.yiij.base.interfaces.IContext;
+import com.yiij.web.interfaces.IViewRenderer;
 import com.yiij.web.interfaces.IWebComponent;
 import com.yiij.web.interfaces.IWebModule;
 
@@ -71,7 +72,13 @@ public class WebModule extends Module implements IWebModule, IWebComponent
 		if(_viewPath!=null)
 			return _viewPath;
 		else
-			return _viewPath=getBasePath()+"/views";
+		{
+			IViewRenderer renderer = webApp().getViewRenderer();
+			if (renderer.getFileExtension()!=null)
+				return _viewPath=getBasePath()+"/views";
+			else
+				return _viewPath=".views";
+		}
 	}
 
 	/**
@@ -98,7 +105,10 @@ public class WebModule extends Module implements IWebModule, IWebComponent
 		if(_layoutPath!=null)
 			return _layoutPath;
 		else
-			return _layoutPath=getViewPath()+"/layouts";
+		{
+			IViewRenderer renderer = webApp().getViewRenderer();
+			return _layoutPath = getViewPath() + (renderer.getFileExtension()!=null?"/":".") + "layouts";
+		}
 	}
 
 	/**
@@ -115,7 +125,7 @@ public class WebModule extends Module implements IWebModule, IWebComponent
 		*/
 	}
 	
-	
+	/*
 	public String getViewPackageName()
 	{
 		if (_viewPackageName == null)
@@ -127,6 +137,7 @@ public class WebModule extends Module implements IWebModule, IWebComponent
 	{
 		_viewPackageName = value;
 	}
+	*/
 	
 	public WebApplication webApp()
 	{
