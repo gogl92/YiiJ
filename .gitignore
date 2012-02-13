@@ -5,3 +5,7 @@
 /framework/.project
 /framework/.settings
 /framework/target
+/mock/.settings
+/mock/target
+/mock/.project
+/mock/.classpath

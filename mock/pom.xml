@@ -1,22 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
-    <groupId>com.yiij</groupId>
     <artifactId>root</artifactId>
+    <groupId>com.yiij</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  
-  <artifactId>yiij</artifactId>
-
-  <name>YiiJ</name>
+  <artifactId>yiij-mock</artifactId>
+  <name>YiiJ-mock</name>
   <url>http://maven.apache.org</url>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -25,30 +21,20 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-    	<groupId>commons-beanutils</groupId>
-    	<artifactId>commons-beanutils</artifactId>
-    	<version>1.8.3</version>
+    	<groupId>com.yiij</groupId>
+    	<artifactId>yiij</artifactId>
+    	<version>0.0.1-SNAPSHOT</version>
     </dependency>
-    <dependency>
-    	<groupId>javax.servlet</groupId>
-    	<artifactId>servlet-api</artifactId>
-    	<version>2.5</version>
-    </dependency>
-    <dependency>
-    	<groupId>org.apache.commons</groupId>
-    	<artifactId>commons-lang3</artifactId>
-    	<version>3.1</version>
-    </dependency>
+		<dependency>
+			<groupId>com.mockrunner</groupId>
+			<artifactId>mockrunner</artifactId>
+			<version>0.4.1</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.6.2</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
-			<scope>test</scope>
 		</dependency>
     
   </dependencies>
@@ -74,6 +60,5 @@
         <url>https://repository.jboss.org/nexus/content/repositories/thirdparty-releases</url>
       </repository>	
 	</repositories>
-	
-	<version>0.0.1-SNAPSHOT</version>
+	  
 </project>

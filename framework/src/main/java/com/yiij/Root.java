@@ -1,7 +1,6 @@
 package com.yiij;
 
 import java.io.IOException;
-import java.util.Hashtable;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;

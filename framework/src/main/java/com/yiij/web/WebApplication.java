@@ -1,8 +1,6 @@
 package com.yiij.web;
 
-import java.util.Hashtable;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +41,6 @@ public class WebApplication extends Application implements IWebApplication,
 	private String _controllerPath;
 	private String _layoutPath;
 	private String _homeUrl;
-	private String _viewPackageName;
 
 	public WebApplication(IContext context, ServletConfig servletConfig,
 			HttpServletRequest servletRequest,

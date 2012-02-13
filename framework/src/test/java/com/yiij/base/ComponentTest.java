@@ -31,14 +31,15 @@ public class ComponentTest extends TestCase
 	public void testComponentInstantiation() throws java.lang.Exception
     {
 		IComponent c;
+		IContext testContext = new TextContext();
 
-		c = Component.newInstance(null, "com.yiij.base.ComponentTest$TC");
+		c = Component.newInstance(testContext, "com.yiij.base.ComponentTest$TC");
 		assertNotNull(c);
 		assertTrue(c instanceof TC);
 
 		c = null;
 		
-		c = Component.newInstance(null, new ComponentConfig("com.yiij.base.ComponentTest$TC") {{
+		c = Component.newInstance(testContext, new ComponentConfig("com.yiij.base.ComponentTest$TC") {{
 			put("name", "john");
 		}});
 		assertNotNull(c);
@@ -65,4 +66,20 @@ public class ComponentTest extends TestCase
     		_name = value;
     	}
     }    
+    
+    class TextContext implements IContext
+    {
+		@Override
+		public Application getApplication()
+		{
+			return null;
+		}
+
+		@Override
+		public void setApplication(Application applcation)
+		{
+			
+		}
+    	
+    }
 }

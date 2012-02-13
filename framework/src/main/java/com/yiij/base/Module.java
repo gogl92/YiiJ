@@ -5,7 +5,6 @@ import java.util.Map;
 
 import com.yiij.base.interfaces.IApplicationComponent;
 import com.yiij.base.interfaces.IContext;
-import com.yiij.web.interfaces.IWebComponent;
 
 public class Module extends Component
 {
