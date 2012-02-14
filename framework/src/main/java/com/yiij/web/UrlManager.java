@@ -224,7 +224,7 @@ public class UrlManager extends WebApplicationComponent
 	 */
 	public String removeUrlSuffix(String pathInfo, String urlSuffix)
 	{
-		if(urlSuffix!="" && pathInfo.substring(pathInfo.length()-urlSuffix.length()).equals(urlSuffix))
+		if(urlSuffix!="" && pathInfo.length() > urlSuffix.length() && pathInfo.substring(pathInfo.length()-urlSuffix.length()).equals(urlSuffix))
 			return pathInfo.substring(0, pathInfo.length()-urlSuffix.length());
 		else
 			return pathInfo;

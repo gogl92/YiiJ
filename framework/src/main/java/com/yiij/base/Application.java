@@ -8,6 +8,8 @@ import java.util.zip.CRC32;
 import javax.servlet.ServletException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.yiij.base.interfaces.IContext;
 
@@ -22,11 +24,14 @@ public abstract class Application extends Module
 	private String _charset = "UTF-8";
 	private Map<String, String> _aliases = new Hashtable<String, String>();
 	
+	private final Logger logger = LoggerFactory.getLogger(Application.class);	
+	
 	public Application(IContext context)
 	{
 		super(context, "", null);
 		
 		context.setApplication(this);
+		logger.trace("Starting YiiJ WebApplication...");
 		
 		registerCoreComponents();
 	}
