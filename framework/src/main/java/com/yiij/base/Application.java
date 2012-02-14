@@ -11,6 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.yiij.base.Event.Listener;
+import com.yiij.base.Event.ListenersList;
 import com.yiij.base.interfaces.IContext;
 
 public abstract class Application extends Module
@@ -23,6 +25,8 @@ public abstract class Application extends Module
 	private String _sourceLanguage = "en_us";
 	private String _charset = "UTF-8";
 	private Map<String, String> _aliases = new Hashtable<String, String>();
+	
+	private ListenersList _eventList = new ListenersList();
 	
 	private final Logger logger = LoggerFactory.getLogger(Application.class);	
 	
@@ -49,22 +53,22 @@ public abstract class Application extends Module
 	 * method to do more application-specific tasks.
 	 * Remember to call the parent implementation so that static application components are loaded.
 	 */
-	public void run() throws ServletException, IOException
+	public void run() throws IOException, ServletException
 	{
-		//if($this->hasEventHandler('onBeginRequest'))
-			//$this->onBeginRequest(new CEvent($this));
+		_eventList.fire(BeginRequestEventListener.class, new Event(this));
 		try
 		{
 			processRequest();
-		} catch (IOException e) {
-			throw e;
 		} catch (ServletException e) {
+			// let exceptions meant for the servlet to go through
+			throw e;
+		} catch (EndApplicationException e) {
+			// normal application termination
 			throw e;
 		} catch (java.lang.Exception e) {
-			throw new ServletException(e);
+			handleException(e);
 		}
-		//if($this->hasEventHandler('onEndRequest'))
-			//$this->onEndRequest(new CEvent($this));
+		_eventList.fire(EndRequestEventListener.class, new Event(this));
 	}
 
 	/**
@@ -252,6 +256,22 @@ public abstract class Application extends Module
 	
 	//public function findLocalizedFile($srcFile,$srcLanguage=null,$language=null)
 	
+	/**
+	 * Handles uncaught Java exceptions.
+	 *
+	 * This method will first raise an {@link #onException} event.
+	 * If the exception is not handled by any event handler, it will call
+	 * {@link #getErrorHandler()} to process the exception.
+	 *
+	 * The application will be terminated by this method.
+	 *
+	 * @param exception that is not caught
+	 */
+	public void handleException(java.lang.Exception exception) 
+		throws ServletException
+	{
+		
+	}
 	
 	/**
 	 * Registers the core application components.
@@ -285,6 +305,49 @@ public abstract class Application extends Module
 			_aliases.remove(alias);
 		else
 			_aliases.put(alias, StringUtils.stripEnd(value, "\\/"));
+	}
+
+	
+	//
+	// EVENT HANDLING
+	//
+	
+	// BEGIN REQUEST
+	public void addBeginRequestEventListener(BeginRequestEventListener listener)
+	{
+		_eventList.add(BeginRequestEventListener.class, listener);
+	}
+
+	public void removeBeginRequestEventListener(BeginRequestEventListener listener)
+	{
+		_eventList.remove(BeginRequestEventListener.class, listener);
+	}
+	
+	public static abstract class BeginRequestEventListener implements Listener
+	{
+		public BeginRequestEventListener()
+		{
+			super();
+		}
+	}
+	
+	// END REQUEST
+	public void addEndRequestEventListener(EndRequestEventListener listener)
+	{
+		_eventList.add(EndRequestEventListener.class, listener);
+	}
+
+	public void removeEndRequestEventListener(EndRequestEventListener listener)
+	{
+		_eventList.remove(EndRequestEventListener.class, listener);
+	}
+	
+	public static abstract class EndRequestEventListener implements Listener
+	{
+		public EndRequestEventListener()
+		{
+			super();
+		}
 	}
 	
 }

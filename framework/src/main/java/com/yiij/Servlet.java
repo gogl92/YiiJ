@@ -14,7 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.yiij.base.Application;
 import com.yiij.base.ComponentConfig;
+import com.yiij.base.EndApplicationException;
 
 @SuppressWarnings("serial")
 public class Servlet extends HttpServlet
@@ -42,7 +44,14 @@ public class Servlet extends HttpServlet
 		ComponentConfig config = new ComponentConfig();
 		config.parseConfigXml(new FileInputStream(getServletContext().getRealPath("/WEB-INF/yiij.xml")));
     	
-    	com.yiij.Root.createWebApplication(config, getServletConfig(), request, response).run();
+		try
+		{
+			Application app = com.yiij.Root.createWebApplication(config, getServletConfig(), request, response);
+			app.run();
+		} catch (EndApplicationException e) {
+			// normal application termination, no error returned
+			return;
+		}
     }
     
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
