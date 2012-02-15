@@ -19,19 +19,19 @@ p {font-family:"Verdana";font-weight:normal;color:black;font-size:9pt;margin-top
 </head>
 
 <body>
-<h1>Error <?php echo $data['code']; ?></h1>
-<h2><?php echo nl2br(CHtml::encode($data['message'])); ?>${data.message}</h2>
+<h1>Error ${data.code}</h1>
+<h2>${data.message}</h2>
 <p>
 The above error occurred when the Web server was processing your request.
 </p>
 <p>
-If you think this is a server error, please contact <?php echo $data['admin']; ?>.
+If you think this is a server error, please contact ${data.admin}.
 </p>
 <p>
 Thank you.
 </p>
 <div class="version">
-<?php echo date('Y-m-d H:i:s',$data['time']) .' '. $data['version']; ?>
+${data.time;date(yyyy.MM.dd HH:mm:ss z)} ${data.version}
 </div>
 </body>
 </html>

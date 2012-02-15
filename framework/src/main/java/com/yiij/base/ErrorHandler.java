@@ -1,12 +1,17 @@
 package com.yiij.base;
 
+import java.util.Date;
+import java.util.Map;
+
 import javax.servlet.ServletException;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.yiij.Root;
 import com.yiij.base.interfaces.IContext;
+import com.yiij.utils.Parameters;
 import com.yiij.web.WebApplication;
 import com.yiij.web.interfaces.IViewRenderer;
 import com.yiij.web.renderers.JTMERenderer;
@@ -14,8 +19,10 @@ import com.yiij.web.renderers.JTMERenderer;
 public class ErrorHandler extends ApplicationComponent
 {
 	private String _errorAction;
-	private java.lang.Exception _error;
+	//private java.lang.Exception _error;
+	private Parameters _error;
 	private boolean _discardOutput=true;
+	private String _adminInfo = "the webmaster";
 	
 	private final Logger logger = LoggerFactory.getLogger(ErrorHandler.class);	
 	
@@ -72,6 +79,22 @@ public class ErrorHandler extends ApplicationComponent
 	}
 	
 	/**
+	 * @return the application administrator information (could be a name or email link). It is displayed in error pages to end users. Defaults to 'the webmaster'.
+	 */
+	public String getAdminInfo()
+	{
+		return _adminInfo;
+	}
+
+	/**
+	 * @see #getAdminInfo()
+	 */
+	public void setAdminInfo(String value)
+	{
+		_adminInfo = value;
+	}
+	
+	/**
 	 * Returns the details about the error that is currently being handled.
 	 * The error is returned in terms of an array, with the following information:
 	 * <ul>
@@ -85,7 +108,7 @@ public class ErrorHandler extends ApplicationComponent
 	 * </ul>
 	 * @return the error details. Null if there is no error.
 	 */
-	public java.lang.Exception getError()
+	public Map<String, Object> getError()
 	{
 		return _error;
 	}
@@ -104,7 +127,13 @@ public class ErrorHandler extends ApplicationComponent
 			{
 				WebApplication webApp = (WebApplication)app;
 				
-				_error = exception;
+				_error = new Parameters();
+				_error.put("code", exception instanceof HttpException ? ((HttpException)exception).statusCode : 500);
+				_error.put("type", exception);
+				_error.put("message", exception.getMessage());
+				_error.put("file", exception.getStackTrace()[0].getFileName());
+				_error.put("line", exception.getStackTrace()[0].getLineNumber());
+				_error.put("trace", ExceptionUtils.getStackTrace(exception));
 				
 				if (!webApp.getResponse().isHeadersSent())
 					webApp.getResponse().setStatus(exception instanceof HttpException?((HttpException)exception).statusCode:500, exception.getClass().getCanonicalName());
@@ -116,8 +145,7 @@ public class ErrorHandler extends ApplicationComponent
 					if(isAjaxRequest())
 						app.displayException(exception);
 					else
-						//render("exception",_error);
-						render("error",_error);
+						render("exception",_error);
 				}
 			}
 			else
@@ -160,20 +188,17 @@ public class ErrorHandler extends ApplicationComponent
 				((WebApplication)context().getApplication()).runController(_errorAction);
 			else
 			{
-				/*
 				// additional information to be passed to view
-				$data['version']=$this->getVersionInfo();
-				$data['time']=time();
-				$data['admin']=$this->adminInfo;
-				include($this->getViewFile($view,$data['code']));
-				*/
+				((Parameters)data).put("version", getVersionInfo());
+				((Parameters)data).put("time", new Date());
+				((Parameters)data).put("admin", getAdminInfo());
 				
 				IViewRenderer renderer = new JTMERenderer(context());
-				renderer.renderFile(null, getViewFile(view, 0), data, false);
+				renderer.renderFile(null, getViewFile(view, Integer.parseInt(((Parameters)data).get("code").toString())), data, false);
 			}
 		}
 		else
-			context().getApplication().displayException(_error);
+			context().getApplication().displayException((java.lang.Exception)_error.get("type"));
 	}
 	
 	/**
