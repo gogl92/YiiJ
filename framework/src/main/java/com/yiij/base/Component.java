@@ -4,8 +4,11 @@ import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConstructorUtils;
+import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.beanutils.converters.BooleanConverter;
 
 import com.yiij.base.interfaces.IComponent;
 import com.yiij.base.interfaces.IContext;
@@ -91,7 +94,7 @@ public class Component implements IComponent
 	{
 		if (config == null)
 			return;
-		
+	
 		PropertyDescriptor pdesc;
 		
 		ArrayList<String> innerConfig = new ArrayList<String>();
@@ -107,7 +110,7 @@ public class Component implements IComponent
 			if (pdesc.getClass().isAssignableFrom(Component.class))
 				innerConfig.add(key);
 			else
-				PropertyUtils.setProperty(this, key, config.get(key));
+				BeanUtils.setProperty(this, key, config.get(key));
 		}
 		
 		for (String ic : innerConfig)

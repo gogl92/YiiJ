@@ -109,7 +109,7 @@ public class ErrorHandler extends ApplicationComponent
 				if (!webApp.getResponse().isHeadersSent())
 					webApp.getResponse().setStatus(exception instanceof HttpException?((HttpException)exception).statusCode:500, exception.getClass().getCanonicalName());
 	
-				if(exception instanceof HttpException || !app.getDebugMode())
+				if(exception instanceof HttpException || !app.isDebugMode())
 					render("error",_error);
 				else
 				{
@@ -239,7 +239,7 @@ public class ErrorHandler extends ApplicationComponent
 	protected String getVersionInfo()
 	{
 		String version;
-		if(context().getApplication().getDebugMode())
+		if(context().getApplication().isDebugMode())
 		{
 			version="<a href=\"http://www.yiiframework.com/\">Yii Framework</a>/"+Root.getVersion();
 			//if(isset($_SERVER['SERVER_SOFTWARE']))

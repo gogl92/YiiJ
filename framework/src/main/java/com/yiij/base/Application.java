@@ -10,6 +10,7 @@ import java.util.zip.CRC32;
 import javax.servlet.ServletException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -310,7 +311,7 @@ public abstract class Application extends Module
 		_sourceLanguage=language;
 	}
 	
-	public boolean getDebugMode()
+	public boolean isDebugMode()
 	{
 		return _debugMode;
 	}
@@ -338,7 +339,7 @@ public abstract class Application extends Module
 	public void handleException(java.lang.Exception exception) 
 		throws ServletException
 	{
-		String message = exception.toString();
+		String message = ExceptionUtils.getRootCauseMessage(exception);
 		
 		logger.error(message);
 		try
