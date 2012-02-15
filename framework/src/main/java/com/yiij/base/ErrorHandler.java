@@ -130,7 +130,7 @@ public class ErrorHandler extends ApplicationComponent
 				_error = new Parameters();
 				_error.put("code", exception instanceof HttpException ? ((HttpException)exception).statusCode : 500);
 				_error.put("type", exception);
-				_error.put("message", exception.getMessage());
+				_error.put("message", ExceptionUtils.getRootCauseMessage(exception));
 				_error.put("file", exception.getStackTrace()[0].getFileName());
 				_error.put("line", exception.getStackTrace()[0].getLineNumber());
 				_error.put("trace", ExceptionUtils.getStackTrace(exception));

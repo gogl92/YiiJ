@@ -9,3 +9,7 @@
 /mock/target
 /mock/.project
 /mock/.classpath
+/samples/yiij-sample-app/.settings
+/samples/yiij-sample-app/target
+/samples/yiij-sample-app/.classpath
+/samples/yiij-sample-app/.project

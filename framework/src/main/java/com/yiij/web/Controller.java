@@ -636,7 +636,7 @@ public class Controller extends BaseController
 			return null;
 		}
 		else
-			throw new com.yiij.base.Exception("{controller} cannot find the requested view '"+view+"'.");
+			throw new com.yiij.base.Exception(getClass().getCanonicalName()+" cannot find the requested view '"+view+"'.");
 	}
 	
 	/**

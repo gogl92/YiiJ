@@ -47,10 +47,10 @@ public class Module extends Component
 				if (context().getApplication() == this)
 					_basePath = "";
 				else
-					_basePath = context().getApplication().getBasePath()+"/"+_id;
+					_basePath = context().getApplication().getBasePath()+"/modules/"+_id;
 			}
 			else
-				_basePath = _parentModule.getBasePath()+"/"+_id;
+				_basePath = _parentModule.getBasePath()+"/modules/"+_id;
 		}
 		return _basePath;
 	}

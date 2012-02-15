@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<yiij>
+	<application>
+		<packageName>com.yiij.samples.yiij_sample_app</packageName>
+		<debugMode>true</debugMode>
+		<components>
+			<urlManager>
+				<!-- 
+				<class>com.rangelreale.java.tests.webservlet.WSHttpRequest</class>
+				--> 
+				<urlFormat>path</urlFormat>
+			</urlManager>
+			<!-- 
+			<viewRenderer>
+				<class>com.yiij.components.renderers.groovy.GroovyRenderer</class>
+			</viewRenderer>
+			 -->
+		</components>
+		<modules>
+			<admin>
+				<class>com.yiij.samples.yiij_sample_app.admin.AdminModule</class>
+			</admin>
+		</modules>
+	</application>
+</yiij>

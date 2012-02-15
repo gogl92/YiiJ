@@ -398,13 +398,13 @@ public abstract class Application extends Module
 				StackTraceElement trace = exception.getStackTrace()[0];
 				
 				out().println("<h1>"+exception.getClass().getCanonicalName()+"</h1>");
-				out().print("<p>"+exception.getMessage()+" ("+trace.getFileName()+":"+trace.getLineNumber()+")</p>");
+				out().print("<p>"+ExceptionUtils.getRootCauseMessage(exception)+" ("+trace.getFileName()+":"+trace.getLineNumber()+")</p>");
 				exception.printStackTrace(out());
 			}
 			else
 			{
 				out().println("<h1>"+exception.getClass().getCanonicalName()+"</h1>");
-				out().print("<p>"+exception.getMessage()+"</p>");
+				out().print("<p>"+ExceptionUtils.getRootCauseMessage(exception)+"</p>");
 			}
 		} catch(IOException e) {
 			logger.warn("Error on displayException: "+e.getMessage());
