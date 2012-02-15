@@ -13,6 +13,11 @@ public class HttpResponse extends WebApplicationComponent
 		super(context);
 	}
 	
+	public boolean isHeadersSent()
+	{
+		return webApp().getServletResponse().isCommitted();
+	}
+	
 	public void flush() throws IOException
 	{
 		webApp().getServletResponse().flushBuffer();
@@ -67,13 +72,6 @@ public class HttpResponse extends WebApplicationComponent
 	{
 		return webApp().getServletResponse().containsHeader(name);
 	}
-
-	/*
-	public String getHeader(String name)
-	{
-		return webApp().getServletResponse().getHeader(name);
-	}
-	*/
 	
 	public void sendRedirect(String location) throws IOException
 	{

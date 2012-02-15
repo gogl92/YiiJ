@@ -2,6 +2,7 @@ package com.yiij.web;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -276,5 +277,55 @@ public class HttpRequest extends WebApplicationComponent
 		_securePort = value;
 		_hostInfo = null;
 	}
+	
+    /**
+    *
+    * Returns the value of the specified request header
+    * as a <code>String</code>. If the request did not include a header
+    * of the specified name, this method returns <code>null</code>.
+    * If there are multiple headers with the same name, this method
+    * returns the first head in the request.
+    * The header name is case insensitive. You can use
+    * this method with any request header.
+    *
+    * @param name		a <code>String</code> specifying the
+    *				header name
+    *
+    * @return			a <code>String</code> containing the
+    *				value of the requested
+    *				header, or <code>null</code>
+    *				if the request does not
+    *				have a header of that name
+    */			
+	public String getHeader(String name)
+	{
+		return webApp().getServletRequest().getHeader(name);
+	}
+	
+    /**
+    *
+    * Returns an enumeration of all the header names
+    * this request contains. If the request has no
+    * headers, this method returns an empty enumeration.
+    *
+    * <p>Some servlet containers do not allow
+    * servlets to access headers using this method, in
+    * which case this method returns <code>null</code>
+    *
+    * @return			an enumeration of all the
+    *				header names sent with this
+    *				request; if the request has
+    *				no headers, an empty enumeration;
+    *				if the servlet container does not
+    *				allow servlets to use this method,
+    *				<code>null</code>
+    *				
+    *
+    */
+   @SuppressWarnings("rawtypes")
+   public Enumeration getHeaderNames()
+   {
+		return webApp().getServletRequest().getHeaderNames();
+   }
 	
 }

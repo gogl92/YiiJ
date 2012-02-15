@@ -7,9 +7,9 @@ import java.util.Scanner;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.web.BaseController;
 import com.yiij.web.WebApplicationComponent;
-import com.yiij.web.interfaces.IPluginViewRenderer;
+import com.yiij.web.interfaces.IApplicationViewRenderer;
 
-public class StaticRenderer extends WebApplicationComponent implements IPluginViewRenderer
+public class StaticRenderer extends WebApplicationComponent implements IApplicationViewRenderer
 {
 	public StaticRenderer(IContext context)
 	{

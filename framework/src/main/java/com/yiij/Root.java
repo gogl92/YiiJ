@@ -32,4 +32,9 @@ public class Root
 			throw new ServletException(e);
 		}
 	}
+	
+	public static String getVersion()
+	{
+		return "1.1.9";
+	}
 }

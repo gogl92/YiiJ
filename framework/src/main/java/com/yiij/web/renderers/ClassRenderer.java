@@ -5,10 +5,10 @@ import java.io.IOException;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.web.BaseController;
 import com.yiij.web.WebApplicationComponent;
-import com.yiij.web.interfaces.IPluginViewRenderer;
+import com.yiij.web.interfaces.IApplicationViewRenderer;
 import com.yiij.web.interfaces.IViewRenderer;
 
-public class ClassRenderer extends WebApplicationComponent implements IPluginViewRenderer
+public class ClassRenderer extends WebApplicationComponent implements IApplicationViewRenderer
 {
 	public ClassRenderer(IContext context)
 	{

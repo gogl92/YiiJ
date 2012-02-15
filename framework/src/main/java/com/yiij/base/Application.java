@@ -1,6 +1,8 @@
 package com.yiij.base;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.zip.CRC32;
@@ -24,7 +26,9 @@ public abstract class Application extends Module
 	private String _language;
 	private String _sourceLanguage = "en_us";
 	private String _charset = "UTF-8";
+	private boolean _debugMode = false;
 	private Map<String, String> _aliases = new Hashtable<String, String>();
+	
 	
 	private ListenersList _eventList = new ListenersList();
 	
@@ -200,6 +204,50 @@ public abstract class Application extends Module
 		_language=language;
 	}
 
+	public String findLocalizedFile(String srcFile)
+	{
+		return findLocalizedFile(srcFile, null, null);
+	}
+	
+	public String findLocalizedFile(String srcFile, String srcLanguage)
+	{
+		return findLocalizedFile(srcFile, srcLanguage, null);
+	}
+	
+	/**
+	 * Returns the localized version of a specified file.
+	 *
+	 * The searching is based on the specified language code. In particular,
+	 * a file with the same name will be looked for under the subdirectory
+	 * named as the locale ID. For example, given the file "path/to/view.php"
+	 * and locale ID "zh_cn", the localized file will be looked for as
+	 * "path/to/zh_cn/view.php". If the file is not found, the original file
+	 * will be returned.
+	 *
+	 * For consistency, it is recommended that the locale ID is given
+	 * in lower case and in the format of LanguageID_RegionID (e.g. "en_us").
+	 *
+	 * @param srcFile the original file
+	 * @param srcLanguage the language that the original file is in. If null, the application {@link sourceLanguage source language} is used.
+	 * @param language the desired language that the file should be localized to. If null, the {@link getLanguage application language} will be used.
+	 * @return the matching localized file. The original file is returned if no localized version is found
+	 * or if source language is the same as the desired language.
+	 */
+	public String findLocalizedFile(String srcFile, String srcLanguage, String language)
+	{
+		if(srcLanguage==null)
+			srcLanguage=_sourceLanguage;
+		if(language==null)
+			language=_language;
+		if(language.equals(srcLanguage))
+			return srcFile;
+		
+		File sFile = new File(srcFile);
+		File desiredFile = new File(sFile.getPath()+"/"+language+"/"+sFile.getName());
+		return desiredFile.isFile() ? desiredFile.getAbsolutePath() : srcFile;
+	}
+	
+	
 	/**
 	 * @return the application name. Defaults to 'My Application'.
 	 */
@@ -253,6 +301,17 @@ public abstract class Application extends Module
 		_sourceLanguage=language;
 	}
 	
+	public boolean getDebugMode()
+	{
+		return _debugMode;
+	}
+	
+	public void setDebugMode(boolean value)
+	{
+		_debugMode = value;
+	}
+	
+	abstract public PrintWriter out() throws IOException;
 	
 	//public function findLocalizedFile($srcFile,$srcLanguage=null,$language=null)
 	
@@ -271,6 +330,34 @@ public abstract class Application extends Module
 		throws ServletException
 	{
 		
+	}
+	
+	/**
+	 * Displays the uncaught PHP exception.
+	 * This method displays the exception in HTML when there is
+	 * no active error handler.
+	 * @param exception the uncaught exception
+	 */
+	public void displayException(java.lang.Exception exception)
+	{
+		try
+		{
+			if(_debugMode)
+			{
+				StackTraceElement trace = exception.getStackTrace()[0];
+				
+				out().println("<h1>"+exception.getClass().getCanonicalName()+"</h1>");
+				out().print("<p>"+exception.getMessage()+" ("+trace.getFileName()+":"+trace.getLineNumber()+")</p>");
+				exception.printStackTrace(out());
+			}
+			else
+			{
+				out().println("<h1>"+exception.getClass().getCanonicalName()+"</h1>");
+				out().print("<p>"+exception.getMessage()+"</p>");
+			}
+		} catch(IOException e) {
+			logger.warn("Error on displayException: "+e.getMessage());
+		}
 	}
 	
 	/**

@@ -34,7 +34,7 @@ public class interfaces
 		public String renderFile(BaseController controller, String file, Object data, boolean doReturn) throws IOException;
 	}	
 	
-	public interface IPluginViewRenderer extends IViewRenderer, IApplicationComponent
+	public interface IApplicationViewRenderer extends IViewRenderer, IApplicationComponent
 	{
 	}	
 }

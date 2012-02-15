@@ -1,5 +1,7 @@
 package com.yiij.web;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
@@ -16,7 +18,7 @@ import com.yiij.base.Module;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.base.interfaces.IWebApplication;
 import com.yiij.utils.StringHelper;
-import com.yiij.web.interfaces.IPluginViewRenderer;
+import com.yiij.web.interfaces.IApplicationViewRenderer;
 import com.yiij.web.interfaces.IViewRenderer;
 import com.yiij.web.interfaces.IWebComponent;
 import com.yiij.web.interfaces.IWebModule;
@@ -36,7 +38,7 @@ public class WebApplication extends Application implements IWebApplication,
 	private UrlManager _urlManager;
 	private HttpRequest _request;
 	private HttpResponse _response;
-	private IPluginViewRenderer _viewRenderer;
+	private IApplicationViewRenderer _viewRenderer;
 	private Controller _controller;
 	private String _controllerPath;
 	private String _layoutPath;
@@ -122,6 +124,7 @@ public class WebApplication extends Application implements IWebApplication,
 		config.put("urlManager", new ComponentConfig("com.yiij.web.UrlManager"));
 		config.put("request", new ComponentConfig("com.yiij.web.HttpRequest"));
 		config.put("response", new ComponentConfig("com.yiij.web.HttpResponse"));
+		config.put("viewRenderer", new ComponentConfig("com.yiij.web.renderers.JTMERenderer"));
 
 		setComponents(config);
 	}
@@ -187,12 +190,12 @@ public class WebApplication extends Application implements IWebApplication,
 	 * 
 	 * @return the view renderer.
 	 */
-	public IPluginViewRenderer getViewRenderer()
+	public IApplicationViewRenderer getViewRenderer()
 	{
 		if (_viewRenderer == null)
 			try
 			{
-				_viewRenderer = (IPluginViewRenderer) getComponent("viewRenderer");
+				_viewRenderer = (IApplicationViewRenderer) getComponent("viewRenderer");
 				if (_viewRenderer == null)
 					_viewRenderer = new ClassRenderer(context());
 			} catch (Exception e)
@@ -645,6 +648,11 @@ public class WebApplication extends Application implements IWebApplication,
 		_homeUrl = value;
 	}
 
+	@Override
+	public PrintWriter out() throws IOException
+	{
+		return getResponse().getWriter();
+	}
 	
 	@Override
 	public ServletConfig getServletConfig()
