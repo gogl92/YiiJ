@@ -13,3 +13,7 @@
 /samples/yiij-sample-app/target
 /samples/yiij-sample-app/.classpath
 /samples/yiij-sample-app/.project
+/samples/yiij-sample-webapp/target
+/samples/yiij-sample-webapp/.settings
+/samples/yiij-sample-webapp/.classpath
+/samples/yiij-sample-webapp/.project

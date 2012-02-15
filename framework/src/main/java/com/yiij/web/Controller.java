@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.yiij.Root;
 import com.yiij.base.Application;
@@ -23,6 +25,8 @@ public class Controller extends BaseController
 	private String _id;
 	private IWebModule _module;
 	private Action _action;
+
+	private final Logger logger = LoggerFactory.getLogger(Controller.class);	
 	
 	public Controller(IContext context, String id, IWebModule module)
 	{
@@ -417,6 +421,8 @@ public class Controller extends BaseController
 	 */
 	public String resolveViewFile(String viewName, String viewPath, String basePath, String moduleViewPath)
 	{
+		logger.trace("{}: resolveViewFile {}, {}, {}, {}", new Object[] { getClass().getCanonicalName(), viewName, viewPath, basePath, moduleViewPath} );
+		
 		if (viewName == null || viewName.equals(""))
 			return null;
 

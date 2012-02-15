@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <yiij>
 	<application>
-		<packageName>com.yiij.samples.yiij_sample_app</packageName>
+		<packageName>com.yiij.samples.yiij_sample_webapp</packageName>
 		<debugMode>true</debugMode>
 		<components>
 			<urlManager>
@@ -15,7 +15,7 @@
 		</components>
 		<modules>
 			<admin>
-				<class>com.yiij.samples.yiij_sample_app.admin.AdminModule</class>
+				<class>com.yiij.samples.yiij_sample_webapp.AdminModule</class>
 			</admin>
 		</modules>
 	</application>
