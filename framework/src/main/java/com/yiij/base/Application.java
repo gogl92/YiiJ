@@ -254,7 +254,7 @@ public abstract class Application extends Module
 		
 		File sFile = new File(srcFile);
 		File desiredFile = new File(sFile.getPath()+"/"+language+"/"+sFile.getName());
-		return Object.class.getResource(desiredFile.getAbsolutePath()) != null ? desiredFile.getAbsolutePath() : srcFile;
+		return getClass().getResource(desiredFile.getAbsolutePath()) != null ? desiredFile.getAbsolutePath() : srcFile;
 	}
 	
 	

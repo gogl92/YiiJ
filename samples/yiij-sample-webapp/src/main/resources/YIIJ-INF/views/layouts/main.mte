@@ -1,4 +1,4 @@
-YiiJ Sample App
+YiiJ Sample App - ${this.pageTitle}
 ===============
 
 ${data.content}

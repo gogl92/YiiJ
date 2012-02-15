@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-<title><?php echo $data['type']; ?></title>
+<title>${data.type}</title>
 
 <style type="text/css">
 /*<![CDATA[*/
@@ -158,14 +158,14 @@ pre span.error-ln {
 
 <body>
 <div class="container">
-	<h1><?php echo $data['type']?></h1>
+	<h1>${data.type}</h1>
 
 	<p class="message">
-		<?php echo nl2br(htmlspecialchars($data['message'],ENT_QUOTES,Yii::app()->charset))?>
+		${data.message;htmlencode}
 	</p>
 
 	<div class="source">
-		<p class="file"><?php echo htmlspecialchars($data['file'],ENT_QUOTES,Yii::app()->charset)."({$data['line']})"?></p>
+		<p class="file">${data.file;htmlencode}(${data.line})</p>
 		<?php echo $this->renderSourceCode($data['file'],$data['line'],$this->maxSourceLines); ?>
 	</div>
 
@@ -214,7 +214,7 @@ pre span.error-ln {
 	</div>
 
 	<div class="version">
-		<?php echo date('Y-m-d H:i:s',$data['time']) .' '. $data['version']; ?>
+		${data.time;date(yyyy.MM.dd HH:mm:ss z)} ${data.version}
 	</div>
 </div>
 

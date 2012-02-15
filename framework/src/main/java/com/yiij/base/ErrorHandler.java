@@ -129,7 +129,8 @@ public class ErrorHandler extends ApplicationComponent
 				
 				_error = new Parameters();
 				_error.put("code", exception instanceof HttpException ? ((HttpException)exception).statusCode : 500);
-				_error.put("type", exception);
+				_error.put("type", exception.getClass().getCanonicalName());
+				_error.put("exception", exception);
 				_error.put("message", ExceptionUtils.getRootCauseMessage(exception));
 				_error.put("file", exception.getStackTrace()[0].getFileName());
 				_error.put("line", exception.getStackTrace()[0].getLineNumber());
@@ -198,7 +199,7 @@ public class ErrorHandler extends ApplicationComponent
 			}
 		}
 		else
-			context().getApplication().displayException((java.lang.Exception)_error.get("type"));
+			context().getApplication().displayException((java.lang.Exception)_error.get("exception"));
 	}
 	
 	/**

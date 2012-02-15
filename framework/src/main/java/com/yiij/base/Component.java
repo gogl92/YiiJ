@@ -1,6 +1,7 @@
 package com.yiij.base;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -17,15 +18,15 @@ public class Component implements IComponent
 {
 	private IContext _context;
 
-	public static IComponent newInstance(IContext context, Object config, Object... arguments) throws 
-		java.lang.Exception
+	public static IComponent newInstance(IContext context, Object config, Object... arguments) 
+		throws InstantiationException
 	{
 		return Component.newInstance(context, config, arguments, null);
 	}
 	
 	@SuppressWarnings({ "unchecked" })
-	public static IComponent newInstance(IContext context, Object config, Object[] arguments, Class<?>[] types) throws 
-		java.lang.Exception
+	public static IComponent newInstance(IContext context, Object config, Object[] arguments, Class<?>[] types) 
+			throws InstantiationException
 	{
 		String type = null;
 		ComponentConfig cconfig = null;
@@ -40,9 +41,14 @@ public class Component implements IComponent
 			type = cconfig.className;
 		}
 		else
-			throw new Exception("Object configuration must be an array containing a 'class' element.");
+			throw new Exception("Object configuration must be a string class name or a ComponentConfig object.");
 		
-		Class<Component> cclass = (Class<Component>) Class.forName(type);
+		Class<Component> cclass;
+		try {
+			cclass = (Class<Component>) Class.forName(type);
+		} catch (ClassNotFoundException e) {
+			throw new InstantiationException(e.getMessage());
+		}
 		
 		Object[] realArguments = new Object[arguments.length+1];
 		realArguments[0] = context;
@@ -63,10 +69,19 @@ public class Component implements IComponent
 		}
 		
 		Component object;
-		if (types == null)
-			object = (Component)ConstructorUtils.invokeConstructor(cclass, realArguments);
-		else
-			object = (Component)ConstructorUtils.invokeExactConstructor(cclass, realArguments, realTypes);
+		try
+		{
+			if (types == null)
+				object = (Component)ConstructorUtils.invokeConstructor(cclass, realArguments);
+			else
+				object = (Component)ConstructorUtils.invokeExactConstructor(cclass, realArguments, realTypes);
+		} catch (NoSuchMethodException e) {
+			throw new InstantiationException(e.getMessage());
+		} catch (IllegalAccessException e) {
+			throw new InstantiationException(e.getMessage());
+		} catch (InvocationTargetException e) {
+			throw new InstantiationException(e.getMessage());
+		}
 		
 		if (context == null && object instanceof Application)
 		{
@@ -90,7 +105,8 @@ public class Component implements IComponent
 		return _context;
 	}
 	
-	public void configure(ComponentConfig config) throws java.lang.Exception
+	public void configure(ComponentConfig config) throws 
+		InstantiationException
 	{
 		if (config == null)
 			return;
@@ -99,23 +115,34 @@ public class Component implements IComponent
 		
 		ArrayList<String> innerConfig = new ArrayList<String>();
 		
-		Iterator<String> i = config.keySet().iterator();
-		while (i.hasNext())
+		try
 		{
-			String key = i.next();
+			Iterator<String> i = config.keySet().iterator();
+			while (i.hasNext())
+			{
+				String key = i.next();
+				
+				pdesc = PropertyUtils.getPropertyDescriptor(this, key);
+				if (pdesc == null)
+					throw new NoSuchMethodException("Property '"+key+"' not found in class '"+getClass().getCanonicalName()+"'");
+				if (pdesc.getClass().isAssignableFrom(Component.class))
+					innerConfig.add(key);
+				else
+					BeanUtils.setProperty(this, key, config.get(key));
+			}
 			
-			pdesc = PropertyUtils.getPropertyDescriptor(this, key);
-			if (pdesc == null)
-				throw new NoSuchMethodException("Property '"+key+"' not found in class '"+getClass().getCanonicalName()+"'");
-			if (pdesc.getClass().isAssignableFrom(Component.class))
-				innerConfig.add(key);
-			else
-				BeanUtils.setProperty(this, key, config.get(key));
-		}
-		
-		for (String ic : innerConfig)
-		{
-			((Component)PropertyUtils.getProperty(this, ic)).configure((ComponentConfig)config.get(ic));
+			for (String ic : innerConfig)
+			{
+				((Component)PropertyUtils.getProperty(this, ic)).configure((ComponentConfig)config.get(ic));
+			}
+		} catch (Exception e) {
+			
+		} catch (IllegalAccessException e) {
+			throw new InstantiationException(e.getMessage());
+		} catch (InvocationTargetException e) {
+			throw new InstantiationException(e.getMessage());
+		} catch (NoSuchMethodException e) {
+			throw new InstantiationException(e.getMessage());
 		}
 	}
 	

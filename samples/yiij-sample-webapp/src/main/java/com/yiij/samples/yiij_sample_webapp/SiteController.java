@@ -22,6 +22,8 @@ public class SiteController extends Controller
 	
 	public void actionIndex() throws IOException
 	{
+		setPageTitle("Index page");
+		
 		render("index", "data from controller to view");
 	}
 }

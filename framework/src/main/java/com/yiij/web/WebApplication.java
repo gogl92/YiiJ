@@ -39,6 +39,7 @@ public class WebApplication extends Application implements IWebApplication,
 	private HttpRequest _request;
 	private HttpResponse _response;
 	private IApplicationViewRenderer _viewRenderer;
+	private WidgetFactory _widgetFactory;
 	private Controller _controller;
 	private String _controllerPath;
 	private String _layoutPath;
@@ -126,6 +127,7 @@ public class WebApplication extends Application implements IWebApplication,
 		config.put("request", new ComponentConfig("com.yiij.web.HttpRequest"));
 		config.put("response", new ComponentConfig("com.yiij.web.HttpResponse"));
 		config.put("viewRenderer", new ComponentConfig("com.yiij.web.renderers.JTMERenderer"));
+		config.put("widgetFactory", new ComponentConfig("com.yiij.web.WidgetFactory"));
 
 		setComponents(config);
 	}
@@ -207,6 +209,26 @@ public class WebApplication extends Application implements IWebApplication,
 	}
 
 	/**
+	 * Returns the view renderer. If this component is registered and enabled,
+	 * the default view rendering logic defined in {@link BaseController} will
+	 * be replaced by this renderer.
+	 * 
+	 * @return the view renderer.
+	 */
+	public WidgetFactory getWidgetFactory()
+	{
+		if (_widgetFactory == null)
+			try
+			{
+				_widgetFactory = (WidgetFactory) getComponent("widgetFactory");
+			} catch (Exception e)
+			{
+				_widgetFactory = null; // should never happen
+			}
+		return _widgetFactory;
+	}
+	
+	/**
 	 * Creates the controller and performs the specified action.
 	 * 
 	 * @param route
@@ -225,15 +247,14 @@ public class WebApplication extends Application implements IWebApplication,
 			String actionID = (String) ca[1];
 
 			// list($controller,$actionID)=$ca;
-			// $oldController=$this->_controller;
-			// $this->_controller=$controller;
+			Controller oldController=_controller;
+			_controller = controller;
 			controller.init();
 			controller.run(actionID);
-			// $this->_controller=$oldController;
+			_controller=oldController;
 		} else
 			throw new HttpException(404, "Unable to resolve the request '"
 					+ route + "'.");
-
 	}
 
 	/**

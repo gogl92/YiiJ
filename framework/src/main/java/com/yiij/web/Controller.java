@@ -25,6 +25,7 @@ public class Controller extends BaseController
 	private String _id;
 	private IWebModule _module;
 	private Action _action;
+	private String _pageTitle;
 
 	private final Logger logger = LoggerFactory.getLogger(Controller.class);	
 	
@@ -75,6 +76,16 @@ public class Controller extends BaseController
 		_layout = value;
 	}
 
+	public String getPageTitle()
+	{
+		return _pageTitle;
+	}
+	
+	public void setPageTitle(String value)
+	{
+		_pageTitle = value;
+	}
+	
 	public Object filters()
 	{
 		return null;
@@ -465,8 +476,8 @@ public class Controller extends BaseController
 
 		if (isClassBased)
 			return viewFile;
-		else if (Object.class.getResource(viewFile+extension)!=null)
-			return viewFile+extension; //Yii::app()->findLocalizedFile($viewFile.$extension);
+		else if (getClass().getResource(viewFile+extension)!=null)
+			return webApp().findLocalizedFile(viewFile+extension);
 		//else if($extension!=='.php' && is_file($viewFile.'.php'))
 			//return Yii::app()->findLocalizedFile($viewFile.'.php');
 		else

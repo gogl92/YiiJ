@@ -15,6 +15,7 @@ public class DefaultController extends Controller
 
 	public void actionIndex() throws IOException
 	{
+		setPageTitle("Admin Index");
 		render("index", "sent by DefaultController on AdminModule");
 	}
 }

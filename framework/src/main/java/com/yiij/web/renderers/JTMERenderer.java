@@ -1,13 +1,16 @@
 package com.yiij.web.renderers;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import com.floreysoft.jmte.Engine;
+import com.floreysoft.jmte.NamedRenderer;
+import com.floreysoft.jmte.RenderFormatInfo;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.web.BaseController;
 import com.yiij.web.WebApplicationComponent;
@@ -36,6 +39,7 @@ public class JTMERenderer extends WebApplicationComponent implements
 		model.put("data", data);
 		
 		Engine engine = new Engine();
+		engine.registerNamedRenderer(new HtmlEncodeRenderer());
 		if (doReturn)
 			return engine.transform(readTextFile(file), model);
 		webApp().getResponse().getWriter().print(engine.transform(readTextFile(file), model));
@@ -63,4 +67,27 @@ public class JTMERenderer extends WebApplicationComponent implements
 	    return result.toString();     
 	}
 	
+	private static class HtmlEncodeRenderer implements NamedRenderer
+	{
+		@Override
+		public String render(Object o, String format) {
+			return StringEscapeUtils.escapeHtml4(o.toString());
+		}
+
+		@Override
+		public String getName() {
+			return "htmlencode";
+		}
+
+		@Override
+		public RenderFormatInfo getFormatInfo() {
+			return null;
+		}
+
+		@Override
+		public Class<?>[] getSupportedClasses() {
+			return new Class<?>[] { Object.class };
+		}
+		
+	}
 }

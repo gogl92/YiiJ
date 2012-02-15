@@ -29,20 +29,33 @@ public class ComponentConfig extends Hashtable<String, Object>
 		this.className = className;
 	}
 	
-	public void merge(ComponentConfig other)
+	public void merge(Object other)
 	{
-		for (String i : other.keySet())
+		if (other == null)
 		{
-			if (containsKey(i))
-			{
-				if (get(i) instanceof ComponentConfig && other.get(i) instanceof ComponentConfig)
-					((ComponentConfig)get(i)).merge((ComponentConfig)other.get(i));
-				else
-					put(i, other.get(i));
-			}
-			else
-				put(i, other.get(i));
+			// do nothing
 		}
+		else if (other instanceof String)
+		{
+			this.className = (String)other;
+		}
+		else if (other instanceof ComponentConfig)
+		{
+			for (String i : ((ComponentConfig)other).keySet())
+			{
+				if (containsKey(i))
+				{
+					if (get(i) instanceof ComponentConfig && ((ComponentConfig)other).get(i) instanceof ComponentConfig)
+						((ComponentConfig)get(i)).merge((ComponentConfig)((ComponentConfig)other).get(i));
+					else
+						put(i, ((ComponentConfig)other).get(i));
+				}
+				else
+					put(i, ((ComponentConfig)other).get(i));
+			}
+		}
+		else
+			throw new Exception("Invalid configuration to merge");
 	}
 	
 	public void parseConfigXml(InputStream is) throws IOException

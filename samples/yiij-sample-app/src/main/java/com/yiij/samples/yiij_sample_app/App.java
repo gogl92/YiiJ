@@ -14,8 +14,8 @@ public class App
     	t.init();
 		t.loadYiiJConfig(Object.class.getResourceAsStream("/yiij.xml"));
 
-		//TestServlet.Response response = t.simulateGet("http://localhost");
-		TestServlet.Response response = t.simulateGet("http://localhost/admin");
+		TestServlet.Response response = t.simulateGet("http://localhost");
+		//TestServlet.Response response = t.simulateGet("http://localhost/admin");
 		
 		
 		System.out.println("CONTENT:\n"+response.output);
