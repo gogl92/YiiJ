@@ -1,7 +1,5 @@
 package com.yiij.base;
 
-import java.io.IOException;
-
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
@@ -10,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import com.yiij.Root;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.web.WebApplication;
+import com.yiij.web.interfaces.IViewRenderer;
+import com.yiij.web.renderers.JTMERenderer;
 
 public class ErrorHandler extends ApplicationComponent
 {
@@ -107,7 +107,7 @@ public class ErrorHandler extends ApplicationComponent
 				_error = exception;
 				
 				if (!webApp.getResponse().isHeadersSent())
-					webApp.getResponse().sendError(exception instanceof HttpException?((HttpException)exception).statusCode:500, exception.getClass().getCanonicalName());
+					webApp.getResponse().setStatus(exception instanceof HttpException?((HttpException)exception).statusCode:500, exception.getClass().getCanonicalName());
 	
 				if(exception instanceof HttpException || !app.getDebugMode())
 					render("error",_error);
@@ -116,7 +116,8 @@ public class ErrorHandler extends ApplicationComponent
 					if(isAjaxRequest())
 						app.displayException(exception);
 					else
-						render("exception",_error);
+						//render("exception",_error);
+						render("error",_error);
 				}
 			}
 			else
@@ -125,6 +126,7 @@ public class ErrorHandler extends ApplicationComponent
 		catch (java.lang.Exception e)
 		{
 			logger.error("Error handling exception: "+e.getMessage());
+			e.printStackTrace();
 			throw new ServletException(e);
 		}
 	}
@@ -165,10 +167,68 @@ public class ErrorHandler extends ApplicationComponent
 				$data['admin']=$this->adminInfo;
 				include($this->getViewFile($view,$data['code']));
 				*/
+				
+				IViewRenderer renderer = new JTMERenderer(context());
+				renderer.renderFile(null, getViewFile(view, 0), data, false);
 			}
 		}
 		else
 			context().getApplication().displayException(_error);
+	}
+	
+	/**
+	 * Determines which view file should be used.
+	 * @param string $view view name (either 'exception' or 'error')
+	 * @param integer $code HTTP status code
+	 * @return string view file path
+	 */
+	protected String getViewFile(String view, int code)
+	{
+		String[] viewPaths = new String[] {
+			//Yii::app()->getTheme()===null ? null :  Yii::app()->getTheme()->getSystemViewPath(),
+			//Yii::app() instanceof CWebApplication ? Yii::app()->getSystemViewPath() : null,
+			"/com/yiij/views",
+		};
+
+		for(int i = 0; i < viewPaths.length; i++)
+		{
+			String viewPath=viewPaths[i];
+			if(viewPath!=null)
+			{
+				 String viewFile=getViewFileInternal(viewPath,view,code,i==0?"en_us":null);
+				 if(Object.class.getResource(viewFile)!=null)
+				 	 return viewFile;
+			}
+		}
+		return null;
+	}
+	
+	protected String getViewFileInternal(String viewPath, String view, int code)
+	{
+		return getViewFileInternal(viewPath, view, code, null);
+	}
+	
+	/**
+	 * Looks for the view under the specified directory.
+	 * @param viewPath the directory containing the views
+	 * @param view view name (either 'exception' or 'error')
+	 * @param code HTTP status code
+	 * @param srcLanguage the language that the view file is in
+	 * @return view file path
+	 */
+	protected String getViewFileInternal(String viewPath, String view, int code, String srcLanguage)
+	{
+		Application app = context().getApplication();
+		String viewFile;
+		if(view.equals("error"))
+		{
+			viewFile=app.findLocalizedFile(viewPath+"/"+"error"+code+".mte",srcLanguage);
+			if(Object.class.getResource(viewFile)==null)
+				viewFile=app.findLocalizedFile(viewPath+"/"+"error.mte",srcLanguage);
+		}
+		else
+			viewFile=viewPath+"/"+"exception.mte";
+		return viewFile;
 	}
 	
 	/**

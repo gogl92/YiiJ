@@ -36,7 +36,10 @@ public class JTMERenderer extends WebApplicationComponent implements
 		model.put("data", data);
 		
 		Engine engine = new Engine();
-		return engine.transform(readTextFile(file), model);
+		if (doReturn)
+			return engine.transform(readTextFile(file), model);
+		webApp().getResponse().getWriter().print(engine.transform(readTextFile(file), model));
+		return null;
 	}
 
 	private String readTextFile(String file) throws IOException {

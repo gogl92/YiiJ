@@ -83,6 +83,12 @@ public class HttpResponse extends WebApplicationComponent
 		webApp().getServletResponse().setStatus(sc);
 	}
 
+	@SuppressWarnings("deprecation")
+	public void setStatus(int sc, String message)
+	{
+		webApp().getServletResponse().setStatus(sc, message);
+	}
+	
 	public void sendError(int sc) throws IOException
 	{
 		webApp().getServletResponse().sendError(sc);

@@ -13,9 +13,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.yiij.base.ErrorHandler.ExceptionEvent;
 import com.yiij.base.Event.Listener;
 import com.yiij.base.Event.ListenersList;
 import com.yiij.base.interfaces.IContext;
+import com.yiij.web.HttpRequest;
 
 public abstract class Application extends Module
 {
@@ -29,6 +31,7 @@ public abstract class Application extends Module
 	private boolean _debugMode = false;
 	private Map<String, String> _aliases = new Hashtable<String, String>();
 	
+	private ErrorHandler _errorHandler;
 	
 	private ListenersList _eventList = new ListenersList();
 	
@@ -75,18 +78,24 @@ public abstract class Application extends Module
 		_eventList.fire(EndRequestEventListener.class, new Event(this));
 	}
 
+	public void end(int status)
+	{
+		end(status, true);
+	}
+	
 	/**
 	 * Terminates the application.
 	 * This method replaces PHP's exit() function by calling
 	 * {@link onEndRequest} before exiting.
-	 * @param integer $status exit status (value 0 means normal exit while other values mean abnormal exit).
-	 * @param boolean $exit whether to exit the current request. This parameter has been available since version 1.1.5.
+	 * @param status exit status (value 0 means normal exit while other values mean abnormal exit).
+	 * @param exit whether to exit the current request. This parameter has been available since version 1.1.5.
 	 * It defaults to true, meaning the PHP's exit() function will be called at the end of this method.
 	 */
 	public void end(int status, boolean exit)
 	{
-		//if($this->hasEventHandler('onEndRequest'))
-			//$this->onEndRequest(new CEvent($this));
+		_eventList.fire(EndRequestEventListener.class, new Event(this));
+		//if (exit)
+			//throw new EndApplicationException();
 		//if($exit)
 			//exit($status);
 	}
@@ -238,13 +247,13 @@ public abstract class Application extends Module
 		if(srcLanguage==null)
 			srcLanguage=_sourceLanguage;
 		if(language==null)
-			language=_language;
+			language=getLanguage();
 		if(language.equals(srcLanguage))
 			return srcFile;
 		
 		File sFile = new File(srcFile);
 		File desiredFile = new File(sFile.getPath()+"/"+language+"/"+sFile.getName());
-		return desiredFile.isFile() ? desiredFile.getAbsolutePath() : srcFile;
+		return Object.class.getResource(desiredFile.getAbsolutePath()) != null ? desiredFile.getAbsolutePath() : srcFile;
 	}
 	
 	
@@ -329,6 +338,47 @@ public abstract class Application extends Module
 	public void handleException(java.lang.Exception exception) 
 		throws ServletException
 	{
+		String message = exception.toString();
+		
+		logger.error(message);
+		try
+		{
+			ExceptionEvent event=new ExceptionEvent(this,exception);
+			//$this->onException($event);
+			if(!event.getHandled())
+			{
+				// try an error handler
+				ErrorHandler handler;
+				if((handler=getErrorHandler())!=null)
+					handler.handle(event);
+				else
+					displayException(exception);
+			}
+		}
+		catch(java.lang.Exception e)
+		{
+			displayException(e);
+		}
+
+		try
+		{
+			//end(1);
+		}
+		catch(java.lang.Exception e)
+		{
+			// use the most primitive way to log error
+			/*
+			$msg = get_class($e).': '.$e->getMessage().' ('.$e->getFile().':'.$e->getLine().")\n";
+			$msg .= $e->getTraceAsString()."\n";
+			$msg .= "Previous exception:\n";
+			$msg .= get_class($exception).': '.$exception->getMessage().' ('.$exception->getFile().':'.$exception->getLine().")\n";
+			$msg .= $exception->getTraceAsString()."\n";
+			$msg .= '$_SERVER='.var_export($_SERVER,true);
+			error_log($msg);
+			exit(1);
+			*/
+			System.out.println("Could not catch all exceptions, fall back on exception: "+e.getMessage());
+		}
 		
 	}
 	
@@ -366,7 +416,32 @@ public abstract class Application extends Module
 	 */
 	protected void registerCoreComponents()
 	{
+		ComponentConfig config = new ComponentConfig();
+
+		config.put("errorHandler", new ComponentConfig("com.yiij.base.ErrorHandler"));
+		
+		setComponents(config);
 	}
+	
+	/**
+	 * Returns the error handler component.
+	 * 
+	 * @return the error handler component
+	 */
+	public ErrorHandler getErrorHandler()
+	{
+		if (_errorHandler == null)
+			try
+			{
+				_errorHandler = (ErrorHandler) getComponent("errorHandler");
+			} catch (java.lang.Exception e)
+			{
+				logger.error("errorHandler: Should never happen");
+				_errorHandler = null; // should never happen
+			}
+		return _errorHandler;
+	}
+	
 	
 	public String getPathOfAlias(String alias)
 	{
