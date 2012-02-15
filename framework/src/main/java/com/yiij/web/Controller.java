@@ -421,7 +421,7 @@ public class Controller extends BaseController
 	 */
 	public String resolveViewFile(String viewName, String viewPath, String basePath, String moduleViewPath)
 	{
-		logger.trace("{}: resolveViewFile {}, {}, {}, {}", new Object[] { getClass().getCanonicalName(), viewName, viewPath, basePath, moduleViewPath} );
+		logger.trace("{}: resolveViewFile =  viewFile:{}, viewPath:{}, basePath:{}, moduleViewPath:{}", new Object[] { getClass().getCanonicalName(), viewName, viewPath, basePath, moduleViewPath} );
 		
 		if (viewName == null || viewName.equals(""))
 			return null;

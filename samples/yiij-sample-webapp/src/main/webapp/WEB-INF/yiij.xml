@@ -15,7 +15,7 @@
 		</components>
 		<modules>
 			<admin>
-				<class>com.yiij.samples.yiij_sample_webapp.AdminModule</class>
+				<class>com.yiij.samples.yiij_sample_webapp.admin.AdminModule</class>
 			</admin>
 		</modules>
 	</application>

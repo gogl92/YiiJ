@@ -53,7 +53,8 @@ public class WebApplication extends Application implements IWebApplication,
 		_servletRequest = servletRequest;
 		_servletResponse = servletResponse;
 
-		setBasePath(_servletConfig.getServletContext().getRealPath("/"));
+		//setBasePath(_servletConfig.getServletContext().getRealPath("/"));
+		setBasePath("/YIIJ-INF");
 		setPathOfAlias("application", getBasePath());
 	}
 
