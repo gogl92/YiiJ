@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -13,11 +12,9 @@ import com.floreysoft.jmte.DefaultModelAdaptor;
 import com.floreysoft.jmte.Engine;
 import com.floreysoft.jmte.ErrorHandler;
 import com.floreysoft.jmte.NamedRenderer;
-import com.floreysoft.jmte.ProcessListener;
 import com.floreysoft.jmte.Processor;
 import com.floreysoft.jmte.RenderFormatInfo;
 import com.floreysoft.jmte.TemplateContext;
-import com.floreysoft.jmte.token.StringToken;
 import com.floreysoft.jmte.token.Token;
 import com.yiij.base.interfaces.IContext;
 import com.yiij.web.BaseController;
@@ -38,12 +35,16 @@ public class JTMERenderer extends WebApplicationComponent implements
 		return ".mte";
 	}
 
+	/**
+	 * Initialize the JTME engine, add the data, and parse.
+	 * @return the parsed template
+	 */
 	@Override
 	public String renderFile(BaseController controller, String file,
 			Object data, boolean doReturn) throws IOException
 	{
 		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("this", new BaseControllerWrapper(controller));
+		model.put("this", controller);
 		model.put("data", data);
 		
 		Engine engine = new Engine();
@@ -55,15 +56,6 @@ public class JTMERenderer extends WebApplicationComponent implements
 		return null;
 	}
 
-	private static class EngineProcessListener implements ProcessListener
-	{
-
-		@Override
-		public void log(TemplateContext context, Token token, Action action)
-		{
-		}
-	}
-	
 	private String readTextFile(String file) throws IOException {
 	    StringBuilder result = new StringBuilder();
 
@@ -85,6 +77,11 @@ public class JTMERenderer extends WebApplicationComponent implements
 	    return result.toString();     
 	}
 	
+	/**
+	 * Renderer for html encoding.
+	 * Syntax: ${variable;htmlencoding}
+	 * @author Rangel Reale
+	 */
 	private static class HtmlEncodeRenderer implements NamedRenderer
 	{
 		@Override
@@ -109,12 +106,21 @@ public class JTMERenderer extends WebApplicationComponent implements
 		
 	}
 	
-	private static interface MethodCallable
+	/**
+	 * Interface to add callable objects in layout.
+	 * Syntax: ${callable.method}, the callable object will receive the method name.
+	 * @author Rangel Reale
+	 */
+	public static interface MethodCallable
 	{
 		Object call(TemplateContext context, String method, Token token);
 	}
-	
-	public static class MethodCallableCall implements Processor<Object>
+
+	/**
+	 * Helper object to give context to a callable.
+	 * @author Rangel Reale
+	 */
+	private static class MethodCallableCall implements Processor<Object>
 	{
 		private MethodCallable _callable;
 		private String _method;
@@ -136,6 +142,11 @@ public class JTMERenderer extends WebApplicationComponent implements
 		}
 	}
 	
+	/**
+	 * Custom model adaptor for YiiJ.
+	 * Allows the processing of {@link MethodCallable} objects to do custom programming
+	 * @author Rangel Reale
+	 */
 	private static class YiiJModelAdaptor extends DefaultModelAdaptor
 	{
 		protected Object nextStep(Object o, String attributeName,
@@ -147,63 +158,4 @@ public class JTMERenderer extends WebApplicationComponent implements
 			return super.nextStep(o, attributeName, errorHandler, token);
 		}
 	}
-	
-	public static class NullOutput
-	{
-		public String toString()
-		{
-			return "";
-		}
-	}
-	
-	
-	public static class BaseControllerWrapper implements MethodCallable
-	{
-		private BaseController _controller;
-		
-		public BaseControllerWrapper(BaseController controller)
-		{
-			super();
-			_controller = controller;
-		}
-		
-		@Override
-		public Object call(TemplateContext context, String method, Token token)
-		{
-			try
-			{
-				// widget must always capture output
-				if (method.equals("beginWidget"))
-				{
-					_controller.webApp().getResponse().ob_start();
-					_controller.beginWidget(((StringToken)token).getDefaultValue());
-					return new NullOutput();
-				}
-				else if (method.equals("endWidget"))
-				{
-					_controller.endWidget(((StringToken)token).getDefaultValue());
-					_controller.webApp().getResponse().ob_end_clean();
-					return new NullOutput();
-				}
-				else if (method.equals("widget"))
-				{
-					//String[] params = ((StringToken)token).getDefaultValue().split(",");
-					
-					//boolean captureOutput = params.length>1 && params[1].equals("true");
-					
-					Object result = _controller.widget(((StringToken)token).getDefaultValue(), true);
-					return result==null||result.equals("") ? new NullOutput() : result;
-				}
-			} catch (InstantiationException e)
-			{
-				throw new RuntimeException(e);
-			} catch (IOException e)
-			{
-				throw new RuntimeException(e);
-			}
-			return null;
-		}
-	}
-	
-	
 }
