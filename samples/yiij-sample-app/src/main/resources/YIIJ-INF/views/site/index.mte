@@ -1,1 +1,10 @@
 This is the "index" view for SiteController. I received this data: "${data}".
+
+
+${this.beginWidget(com.yiij.samples.yiij_sample_app.components.Login)}
+Nada demais!
+${this.endWidget()}
+
+
+${this.widget(com.yiij.samples.yiij_sample_app.components.Login)}
+
