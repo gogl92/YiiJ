@@ -1,1 +1,6 @@
-Action vindo do Velocity.
+This is the "index" view for SiteController. I received this data: "${data}". (Velocity template)
+
+
+${this.widget('com.yiij.samples.yiij_sample_app.components.Login', true)}
+
+The end

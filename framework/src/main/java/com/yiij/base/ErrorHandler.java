@@ -5,7 +5,7 @@ import java.util.Map;
 
 import javax.servlet.ServletException;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +14,7 @@ import com.yiij.base.interfaces.IContext;
 import com.yiij.utils.Parameters;
 import com.yiij.web.WebApplication;
 import com.yiij.web.interfaces.IViewRenderer;
-import com.yiij.web.renderers.JTMERenderer;
+import com.yiij.web.renderers.VelocityRenderer;
 
 public class ErrorHandler extends ApplicationComponent
 {
@@ -154,7 +154,7 @@ public class ErrorHandler extends ApplicationComponent
 		}
 		catch (java.lang.Exception e)
 		{
-			logger.error("Error handling exception: "+e.getMessage());
+			logger.error("Error handling exception: "+ExceptionUtils.getRootCauseMessage(e));
 			e.printStackTrace();
 			throw new ServletException(e);
 		}
@@ -194,7 +194,7 @@ public class ErrorHandler extends ApplicationComponent
 				((Parameters)data).put("time", new Date());
 				((Parameters)data).put("admin", getAdminInfo());
 				
-				IViewRenderer renderer = new JTMERenderer(context());
+				IViewRenderer renderer = new VelocityRenderer(context());
 				renderer.renderFile(null, getViewFile(view, Integer.parseInt(((Parameters)data).get("code").toString())), data, false);
 			}
 		}
@@ -248,12 +248,12 @@ public class ErrorHandler extends ApplicationComponent
 		String viewFile;
 		if(view.equals("error"))
 		{
-			viewFile=app.findLocalizedFile(viewPath+"/"+"error"+code+".mte",srcLanguage);
+			viewFile=app.findLocalizedFile(viewPath+"/"+"error"+code+".vm",srcLanguage);
 			if(Object.class.getResource(viewFile)==null)
-				viewFile=app.findLocalizedFile(viewPath+"/"+"error.mte",srcLanguage);
+				viewFile=app.findLocalizedFile(viewPath+"/"+"error.vm",srcLanguage);
 		}
 		else
-			viewFile=viewPath+"/"+"exception.mte";
+			viewFile=viewPath+"/"+"exception.vm";
 		return viewFile;
 	}
 	

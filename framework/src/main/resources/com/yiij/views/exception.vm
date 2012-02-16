@@ -161,11 +161,12 @@ pre span.error-ln {
 	<h1>${data.type}</h1>
 
 	<p class="message">
-		${data.message;htmlencode}
+		${data.message}
 	</p>
 
+#*
 	<div class="source">
-		<p class="file">${data.file;htmlencode}(${data.line})</p>
+		<p class="file">${data.file}(${data.line})</p>
 		<?php echo $this->renderSourceCode($data['file'],$data['line'],$this->maxSourceLines); ?>
 	</div>
 
@@ -212,9 +213,10 @@ pre span.error-ln {
 		<?php endforeach; ?>
 		</table>
 	</div>
+*#
 
 	<div class="version">
-		${data.time;date(yyyy.MM.dd HH:mm:ss z)} ${data.version}
+		${data.time} ${data.version}
 	</div>
 </div>
 

@@ -9,8 +9,8 @@ import java.util.zip.CRC32;
 
 import javax.servlet.ServletException;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,6 @@ import com.yiij.base.ErrorHandler.ExceptionEvent;
 import com.yiij.base.Event.Listener;
 import com.yiij.base.Event.ListenersList;
 import com.yiij.base.interfaces.IContext;
-import com.yiij.web.HttpRequest;
 
 public abstract class Application extends Module
 {

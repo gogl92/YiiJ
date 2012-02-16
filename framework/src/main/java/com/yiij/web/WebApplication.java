@@ -8,7 +8,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 import com.yiij.base.Application;
 import com.yiij.base.Component;
@@ -126,7 +126,7 @@ public class WebApplication extends Application implements IWebApplication,
 		config.put("urlManager", new ComponentConfig("com.yiij.web.UrlManager"));
 		config.put("request", new ComponentConfig("com.yiij.web.HttpRequest"));
 		config.put("response", new ComponentConfig("com.yiij.web.HttpResponse"));
-		config.put("viewRenderer", new ComponentConfig("com.yiij.web.renderers.JTMERenderer"));
+		config.put("viewRenderer", new ComponentConfig("com.yiij.web.renderers.VelocityRenderer"));
 		config.put("widgetFactory", new ComponentConfig("com.yiij.web.WidgetFactory"));
 
 		setComponents(config);
